@@ -1,0 +1,38 @@
+{
+  "name": "vue-rest-crud",
+  "version": "0.0.8",
+  "description": "A VueJS RESTfull crud component to easily integrate apps with APIs",
+  "author": "Amon Caldas",
+  "license": "Apache-2.0",
+  "main": "./npm_distribution/index.js",
+  "scripts": {
+    "npmPublishBuild": "babel src --presets babel-preset-es2015 --out-dir npm_distribution",
+    "prepublishOnly": "npm run npmPublishBuild",
+    "browserBundle": "browserify src/index.js -o dist/vue-rest-crud.js -t babelify --presets @babel/preset-env  --plugins  transform-class-properties",
+    "browserBundleDebug": "browserify src/index.js --debug -o dist/vue-rest-crud.js -t babelify --presets @babel/preset-env  --plugins  transform-class-properties",
+    "browserBundleProduction": "browserify -g uglifyify src/index.js -t babelify --presets @babel/preset-env  --plugins  transform-class-properties | derequire > dist/vue-rest-crud.js"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-swap"
+    ]
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "babelify": "^8.0.0"
+  },
+  "devDependencies": {
+    "browserify": "16.2.2",
+    "browserify-swap": "0.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/amoncaldas/vue-rest-crud.git"
+  }
+}

@@ -152,7 +152,7 @@ function CrudHttp() {
   };
 
   // Fix a strange bug
-  if (options instanceof 'CrudHttp' && options.options) {
+  if (options instanceof CrudHttp && options.options) {
     this.options = options.options;
   } else {
     this.options = options;

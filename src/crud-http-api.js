@@ -35,10 +35,22 @@ class CrudHttp {
   setDefaultOptions = () => {
     this.options.baseURL = this.options.baseURL || ''
     this.options.showLoadingEventName = this.options.showLoadingEventName || 'showLoading'
-    this.options.isAuthenticated = this.options.isAuthenticated || function () { return false }
-    this.options.getBearerToken = this.options.getBearerToken || function () { return null }
-    this.options.geLocale = this.options.geLocale || function () { return null }
-    this.options.getVueInstance = this.options.getVueInstance || function () { return console.error('the vue instance getting function was not defined') }
+    
+    if(typeof this.options.isAuthenticated !== "function"){
+      this.options.isAuthenticated = function () { return false }
+    } 
+
+    if(typeof this.options.getBearerToken !== "function"){
+      this.options.getBearerToken = function () { return null }
+    }    
+
+    if(typeof this.options.geLocale !== "function"){
+      this.options.geLocale = function () { return null }
+    }
+
+    if(typeof this.options.getVueInstance !== "function"){
+      this.options.getVueInstance = function () { return console.error('the vue instance getting function was not defined') }
+    }
 
     if (typeof this.options.appendLocaleToHeader === 'undefined') {
       this.options.appendLocaleToHeader = false

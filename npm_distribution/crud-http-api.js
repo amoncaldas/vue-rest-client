@@ -37,21 +37,29 @@ function CrudHttp() {
     _this.options.baseURL = _this.options.baseURL || '';
     _this.options.showLoadingEventName = _this.options.showLoadingEventName || 'showLoading';
 
-    _this.options.isAuthenticated = _this.options.isAuthenticated || function () {
-      return false;
-    };
+    if (typeof _this.options.isAuthenticated !== "function") {
+      _this.options.isAuthenticated = function () {
+        return false;
+      };
+    }
 
-    _this.options.getBearerToken = _this.options.getBearerToken || function () {
-      return null;
-    };
+    if (typeof _this.options.getBearerToken !== "function") {
+      _this.options.getBearerToken = function () {
+        return null;
+      };
+    }
 
-    _this.options.geLocale = _this.options.geLocale || function () {
-      return null;
-    };
+    if (typeof _this.options.geLocale !== "function") {
+      _this.options.geLocale = function () {
+        return null;
+      };
+    }
 
-    _this.options.getVueInstance = _this.options.getVueInstance || function () {
-      return console.error('the vue instance getting function was not defined');
-    };
+    if (typeof _this.options.getVueInstance !== "function") {
+      _this.options.getVueInstance = function () {
+        return console.error('the vue instance getting function was not defined');
+      };
+    }
 
     if (typeof _this.options.appendLocaleToHeader === 'undefined') {
       _this.options.appendLocaleToHeader = false;

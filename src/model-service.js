@@ -246,11 +246,13 @@ function ModelService (endPoint, resourceName, options) {
   }
 
   /**
-   * Create a new active record Model instance
+   * Create a new active record Model instance using a 
+   * raw object and the model service configuration.
+   * @param {Object} rawObject
    * @returns Model
    */
-  this.newModelInstance = () => {
-    return new Model(null, this.endPoint, this.resourceName, this.options)
+  this.newModelInstance = (rawObject = null) => {
+    return new Model(rawObject, this.endPoint, this.resourceName, this.options)
   }
 
   return this

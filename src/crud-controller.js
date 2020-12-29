@@ -80,7 +80,7 @@
  * if the current vue instance has a $ref named `form` and does not have the option `skipFormValidation` defined as true, the auto form validation will be ran before save and update
  */
 
-import Form from './form'
+import FormHelper from './form-helper'
 import crudI18nEN from './i18n/crud.i18n.en'
 class CRUD {
   constructor (vm, modelService, options) {
@@ -584,8 +584,8 @@ class CRUD {
     let formRef = this.options.formRef || 'form' // get the form ref (custom or default one)
     let form = this.vm.$refs[formRef] || null // get the form object using the formRef
 
-    let crudForm = new Form(form, this.vm, this.options)
-    validForm = crudForm.validate()
+    let formHelper = new FormHelper(form, this.vm, this.options)
+    validForm = formHelper.validate()
     if (!validForm) {
       let errorMsg = this.options.invalidForm || this.vm.$t('crud.invalidForm')
       // In the default CRUD usage, it is not necessary to

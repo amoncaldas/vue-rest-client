@@ -1562,122 +1562,37 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],27:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.CRUDData = exports.CRUD = undefined;
+exports.CRUDData = exports.CRUD = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * The CRUD controller class allows to add the common extended CRUD actions (get, index, save, update, destroy)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * to a component using the RESTFull API pattern. It is intended to be used in conjunction with the class ModelService (required by the constructor)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * This crud class implements the full cycle to get and send data to/from a remote server, including before destroy confirmation dialog,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * refresh listed data after save, destroy and update and success and confirmation messages.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * EXPORTS: this javascript module exports two objects: CRUDData and CRUD.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * The first one must be injected in the vue data section, using the three dots notation, like this:
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  data: () => ({
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *    ...CRUDData // create the crud data objects (resource, resources and modelService)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  })
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * The second one must be used to instantiate the crud class on the vue created event, like this:
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  created () {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *    // extend this component, adding CRUD functionalities
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *    let options = {...}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *    CRUD.set(this, myModelService, options)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * @see @/core/model-service to understand how to create a myModelService to represent a resource/model
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * TOASTS shown after each action use the following priority: server response message,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * custom message specified in options or the default one (defined @crud/i18n/crud.i18n.en.js)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * @author <amoncaldas@gmail.com> Amon santana
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * @param {*} vm the component content, that can be passed using ´this´
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * @param {*} modelService an instance of the ModelService class representing the service that provides the data service to a resource. @see @/core/model-service
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * @param {*} options object with optional parameters that allows to customize the CRUD behavior
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * The options object may contain the following attributes:
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - queryOnStartup (boolean): if the index action must be ran on the first CRUD run
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - indexFailedMsg (string): custom message to be displayed on index action failure
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - getFailedMsg (string): custom message to be displayed on get single item action failure
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - saveFailedMsg (string): custom message to be displayed on save action failure
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - updatedMsg (string): custom message to be displayed on update action failure
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - confirmDestroyTitle (string): custom title to be displayed on the confirm dialog shown before destroy action
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - confirmDestroyText (string): custom text to be displayed on the confirm dialog shown before destroy action
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - destroyedMsg (string): custom message to be displayed after an resource has been destroyed
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - destroyFailedMsg (string): custom message to be displayed on destroy action failure
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - destroyAbortedMsg (string): custom message to be displayed when a destroy is aborted
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - skipFormValidation (boolean): skips the auto form validation
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - skipAutoIndexAfterAllEvents (boolean) : skips the auto resources reload after data change events (update, destroy and save)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - skipAutoIndexAfterSave (boolean) : skips the auto resources reload after save
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - skipAutoIndexAfterUpdate (boolean) : skips the auto resources reload after update
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - skipAutoIndexAfterDestroy (boolean) : skips the auto resources reload after destroy
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - skipServerMessages (boolean) : skip using server returned message and use only front end messages do display toasters
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - skipShowValidationMsg (boolean) : skit showing the validation error message via toaster when a form is invalid
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - formRef (string, optional) : the alternative name of the form ref you are using in the template. Used to auto validate the form. If not provided, it is assumed that the form ref name is `form`
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - translate (function): a function that will translate a message according the active locale.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - showSuccess: function to be called to show action success message
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - showInfo: function to be called to show action info message
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - showError: function to be called to show action error
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - confirmDialog: function to be called when a confirm resource removal action is run. Expected to return a promise
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - [http-error-status-code-number] : defines the message to be used when an http error status code is returned by a request (only available fot status code from `300` to `505`)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Crud events optional functions:
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * if the vue instance has one of the following defined methods, it is gonna be ran. If it returns false, the execution will be rejected and stopped
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - beforeIndex
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - beforeGet
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - beforeSave
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - beforeUpdate
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - beforeDestroy
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *  - beforeShowError
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * If the vue `component` to which you are adding the CRUD has one of the following defined methods, it is gonna be called by the CRUD passing the related data
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * - afterIndex
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * - afterGet
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * - afterSave
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * - afterUpdate
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * - afterDestroy
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * - afterError
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Form validation:
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * if the current vue instance has a $ref named `form` and does not have the option `skipFormValidation` defined as true, the auto form validation will be ran before save and update
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+var _formHelper = _interopRequireDefault(require("./form-helper"));
 
-var _form = require('./form');
+var _crudI18n = _interopRequireDefault(require("./i18n/crud.i18n.en"));
 
-var _form2 = _interopRequireDefault(_form);
-
-var _crudI18n = require('./i18n/crud.i18n.en');
-
-var _crudI18n2 = _interopRequireDefault(_crudI18n);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var CRUD = function () {
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var CRUD = /*#__PURE__*/function () {
   function CRUD(vm, modelService, options) {
     _classCallCheck(this, CRUD);
 
     _initialiseProps.call(this);
 
     this.vm = vm;
-    this.modelService = modelService;
+    this.modelService = modelService; // If options is not passed, initialize it
 
-    // If options is not passed, initialize it
     this.options = options || {};
-
     this.run();
   }
-
   /**
    * Set the crud for he given view model, service and options
    * @param {*} vm
@@ -1687,8 +1602,7 @@ var CRUD = function () {
 
 
   _createClass(CRUD, [{
-    key: 'run',
-
+    key: "run",
 
     /**
      * The initial function is executed when the class is built
@@ -1697,9 +1611,8 @@ var CRUD = function () {
     value: function run() {
       var _this = this;
 
-      this.vm.resource = this.modelService.newModelInstance();
+      this.vm.resource = this.modelService.newModelInstance(); // Add the CRUD methods to the view model (vm) passed to the constructor
 
-      // Add the CRUD methods to the view model (vm) passed to the constructor
       this.vm.index = this.index;
       this.vm.get = this.get;
       this.vm.save = this.save;
@@ -1710,10 +1623,9 @@ var CRUD = function () {
       this.vm.showSuccess = this.options.showSuccess || this.vm.showSuccess || this.showSuccess;
       this.vm.showInfo = this.options.showInfo || this.vm.showInfo || this.showSuccess;
       this.vm.showError = this.options.showError || this.vm.showError || this.showSuccess;
-      this.vm.confirmDialog = this.options.confirmDialog || this.vm.confirmDialog || this.confirmDialog;
-
-      // If quey on start up is enabled,
+      this.vm.confirmDialog = this.options.confirmDialog || this.vm.confirmDialog || this.confirmDialog; // If quey on start up is enabled,
       // run the initial query
+
       if (this.options.queryOnStartup) {
         this.vm.index().then(function (resources) {
           _this.vm.resources = resources;
@@ -1721,93 +1633,14 @@ var CRUD = function () {
         });
       }
     }
-
     /**
      * Alternative function to show CRUD error
      * @param {String} key
      * @return {String} msg
      */
 
-
-    /**
-     * Alternative function to show CRUD success
-     * @param {String} msg
-     * @param {*} options
-     */
-
-    /**
-     * Alternative function to show CRUD info
-     * @param {String} msg
-     * @param {*} options
-     */
-
-    /**
-     * Alternative function to show CRUD error
-     * @param {String} msg
-     * @param {*} options
-     */
-
-
-    /**
-     * Alternative function to show CRUD error
-     * @param {String} msg
-     * @param {*} options
-     */
-
-
-    /**
-     * Action that queries the model service API, retrieve data and transform, by default,
-     * Each resource of the result will be an active record like instance @see https://en.wikipedia.org/wiki/Active_record_pattern)
-     * @param {*} filters
-     * @returns {Promise}
-     */
-
-
-    /**
-     * Get a single resource data and transform in a Model instance
-     * @see @/core/model-service and @/core/model to read more
-     *
-     * @param {*} pkValue
-     * @returns {Promise}
-     */
-
-
-    /**
-     * Save the current Model instance defined in this.vm.resource.
-     * As the user should see only one form (that represents a resource) per time
-     * there is no need to accept a resource (Model) as parameter
-     *
-     * @returns {Promise}
-     */
-
-
-    /**
-     * Update the current Model instance defined in this.vm.resource.
-     * As the user should see only one form (that represents a resource) per time
-     * there is no need to accept a resource (Model) as parameter
-     *
-     * @returns {Promise}
-     */
-
-
-    /**
-     * Open a dialog to confirm the action and then run the destroy Destroy (delete) the current Model instance defined in this.vm.resource.
-     * This method is intended to be used in a listing view, so it is necessary to pass the resource/Model
-     *
-     * @returns {Promise}
-     */
-
-
-    /**
-     * Run the destroy directly, without confirmation
-     *
-     * @param {*} resource to be destroyed
-     * @returns {Promise}
-     */
-
   }, {
-    key: 'handleError',
-
+    key: "handleError",
 
     /**
      * Handle the error response
@@ -1820,6 +1653,7 @@ var CRUD = function () {
     value: function handleError(response, actionMsg, defaultCrudMsg) {
       // There is no response message in this case, so we define the message considering the options custom message, the options status msg or the default one
       var treatment = this.getErrorTreatment(response, actionMsg, defaultCrudMsg);
+
       if (treatment !== false) {
         if (typeof treatment !== 'function') {
           this.showErrorMessage(response, treatment);
@@ -1827,9 +1661,9 @@ var CRUD = function () {
           treatment(response, actionMsg, defaultCrudMsg);
         }
       }
+
       this.runAfterCallBack('afterError', response);
     }
-
     /**
      * Build the error message
      *
@@ -1841,23 +1675,22 @@ var CRUD = function () {
      */
 
   }, {
-    key: 'getErrorTreatment',
+    key: "getErrorTreatment",
     value: function getErrorTreatment(errorResponse, eventMsg, crudErrorMessage) {
       // We try to get the error message to the returned http status code
       // If available, use it
       if (errorResponse.status && this.options[errorResponse.status] !== undefined) {
         return this.options[errorResponse.status];
-      }
+      } // Use the event error message
 
-      // Use the event error message
+
       if (eventMsg !== null && eventMsg !== undefined) {
         return eventMsg;
-      }
+      } // If none works, use the default crudErrorMessage
 
-      // If none works, use the default crudErrorMessage
+
       return crudErrorMessage.replace(':resource', this.vm.resource.$getName());
     }
-
     /**
      * Run the before proceed optional callback function
      * id the function returns false, stop the flow
@@ -1868,30 +1701,31 @@ var CRUD = function () {
      */
 
   }, {
-    key: 'runProceedCallBack',
+    key: "runProceedCallBack",
     value: function runProceedCallBack(callbackFunc, reject, data) {
       var proceed = true;
+
       if (this.vm.hasOwnProperty(callbackFunc)) {
         proceed = this.vm[callbackFunc](data);
       }
 
       if (proceed === false) {
-        var error = 'proceed stopped on ' + callbackFunc + ' function';
+        var error = "proceed stopped on ".concat(callbackFunc, " function");
         console.log(error);
         var errorMsg = this.options.operationAborted || this.vm.$t('crud.operationAborted');
-        this.vm.showInfo(this.capitalize(errorMsg), { mode: 'multi-line' });
-
-        // In the default CRUD usage, it is not necessary to
+        this.vm.showInfo(this.capitalize(errorMsg), {
+          mode: 'multi-line'
+        }); // In the default CRUD usage, it is not necessary to
         // listen to the promise result
         // if the promise is not being listened
         // it can raise an error when rejected/resolved.
         // This is not a problem!
+
         reject(error);
       }
 
       return proceed === true || proceed === null || proceed === undefined;
     }
-
     /**
      * Run the after optional callback function
      * If the function returns false, stop the flow
@@ -1900,13 +1734,12 @@ var CRUD = function () {
      */
 
   }, {
-    key: 'runAfterCallBack',
+    key: "runAfterCallBack",
     value: function runAfterCallBack(callbackFunc, data) {
       if (this.vm.hasOwnProperty(callbackFunc)) {
         this.vm[callbackFunc](data);
       }
     }
-
     /**
      * Checks whenever the default form $rf exists and if so, if it is valid
      * If invalid, reject the promise and show the invalid form error message
@@ -1916,27 +1749,30 @@ var CRUD = function () {
      */
 
   }, {
-    key: 'formIsValid',
+    key: "formIsValid",
     value: function formIsValid(reject) {
       var validForm = true; // init as valid
+
       var formRef = this.options.formRef || 'form'; // get the form ref (custom or default one)
+
       var form = this.vm.$refs[formRef] || null; // get the form object using the formRef
 
-      var crudForm = new _form2.default(form, this.vm, this.options);
-      validForm = crudForm.validate();
+      var formHelper = new _formHelper["default"](form, this.vm, this.options);
+      validForm = formHelper.validate();
+
       if (!validForm) {
-        var errorMsg = this.options.invalidForm || this.vm.$t('crud.invalidForm');
-        // In the default CRUD usage, it is not necessary to
+        var errorMsg = this.options.invalidForm || this.vm.$t('crud.invalidForm'); // In the default CRUD usage, it is not necessary to
         // listen to the promise result
         // if the promise is not being listened
         // it can raise an error when rejected/resolved.
         // This is not a problem!
+
         reject(errorMsg);
-      }
-      // Validate the form
+      } // Validate the form
+
+
       return validForm;
     }
-
     /**
      * Capitalize a string
      *
@@ -1945,11 +1781,10 @@ var CRUD = function () {
      */
 
   }, {
-    key: 'capitalize',
+    key: "capitalize",
     value: function capitalize(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
     }
-
     /**
      * Show the response error message or the default error message passed
      * @param {*} errorResponse
@@ -1957,17 +1792,17 @@ var CRUD = function () {
      */
 
   }, {
-    key: 'showErrorMessage',
+    key: "showErrorMessage",
     value: function showErrorMessage(errorResponse, frontEndErrorMessage) {
-      var showError = true;
+      var showError = true; // If the message is set as `false` so we shall not display any message
 
-      // If the message is set as `false` so we shall not display any message
       if (frontEndErrorMessage === false) {
         showError = false;
       }
 
       if (this.vm.hasOwnProperty('beforeShowError')) {
         errorResponse.showError = showError; // add the current showError status to the object passed to the call back
+
         showError = this.vm['beforeShowError'](errorResponse);
       }
 
@@ -1977,24 +1812,29 @@ var CRUD = function () {
         if (errorResponse === undefined || errorResponse.status === 500 || !errorResponse.data || !errorResponse.data.message) {
           // if it this and 500 case, we show only a friendly message, and log the error and log the error
           // as we are not sure about the error message size, use multi-line model for the toaster
-          this.vm.showError(this.capitalize(frontEndErrorMessage), { mode: 'multi-line' });
+          this.vm.showError(this.capitalize(frontEndErrorMessage), {
+            mode: 'multi-line'
+          });
           console.log(errorResponse);
         } else {
           // Define the error message to be used
           // either the front end message or the server one (if available)
           var errorMsg = frontEndErrorMessage;
+
           if (!this.options.skipServerMessages) {
             errorMsg = errorResponse.message || errorResponse.data.message;
-          }
-
-          // We show the response error message
+          } // We show the response error message
           // As we are not sure about the error message size, use multi-line model for the toaster
-          this.vm.showError(this.capitalize(errorMsg), { mode: 'multi-line' });
+
+
+          this.vm.showError(this.capitalize(errorMsg), {
+            mode: 'multi-line'
+          });
         }
       }
     }
   }], [{
-    key: 'set',
+    key: "set",
     value: function set(vm, modelService, options) {
       return new CRUD(vm, modelService, options);
     }
@@ -2002,12 +1842,13 @@ var CRUD = function () {
 
   return CRUD;
 }();
-
 /**
  * CRUD data object that must be used to be injected as a collection of
  * data attribute in the vue data section
  */
 
+
+exports.CRUD = CRUD;
 
 var _initialiseProps = function _initialiseProps() {
   var _this2 = this;
@@ -2015,7 +1856,7 @@ var _initialiseProps = function _initialiseProps() {
   this.trasnslate = function (key) {
     var error = 'The translate function was not properly passed via options, so a fallback function was used and english as used as default translation.';
     console.error(error);
-    return _crudI18n2.default.crud[key] || key;
+    return _crudI18n["default"].crud[key] || key;
   };
 
   this.showSuccess = function (msg, options) {
@@ -2032,8 +1873,8 @@ var _initialiseProps = function _initialiseProps() {
 
   this.confirmDialog = function (msg, options) {
     var error = 'Confirm dialog function was not properly passed via parameters. Check the console to see more info.';
-    console.error(error, msg, options);
-    // as the confirm dialog function was not defined, the action has been cancelled
+    console.error(error, msg, options); // as the confirm dialog function was not defined, the action has been cancelled
+
     return new Promise(function (resolve, reject) {
       reject(error);
     });
@@ -2052,25 +1893,23 @@ var _initialiseProps = function _initialiseProps() {
         context.modelService.query(filters).then(function (resources) {
           if (resources.raw && resources.data) {
             resources = resources.data;
-          }
-          // Each returned resource, will be, by default an Model (@core/model) instance, that supports instance methods, like $save, $destroy etc
-          context.vm.resources = resources;
+          } // Each returned resource, will be, by default an Model (@core/model) instance, that supports instance methods, like $save, $destroy etc
 
-          // runs the optional after callback (if the function is defined in the Vue component) an pass the data
-          context.runAfterCallBack('afterIndex', _this2.vm.resources);
 
-          // In the default CRUD usage, it is not necessary to
+          context.vm.resources = resources; // runs the optional after callback (if the function is defined in the Vue component) an pass the data
+
+          context.runAfterCallBack('afterIndex', _this2.vm.resources); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.
           // This is not a problem!
+
           resolve(resources);
         }, function (errorResponse) {
           // Handle the error response
-          context.handleError(errorResponse, context.options.indexFailedMsg, context.vm.$t('crud.failWhileTryingToGetTheResource'));
-
-          // if it is being run because of a queryOnStartup flag, so we need to tell
+          context.handleError(errorResponse, context.options.indexFailedMsg, context.vm.$t('crud.failWhileTryingToGetTheResource')); // if it is being run because of a queryOnStartup flag, so we need to tell
           // the client that the crud request is done
+
           if (context.options.queryOnStartup) {
             context.vm.crudReady = true;
           }
@@ -2087,26 +1926,23 @@ var _initialiseProps = function _initialiseProps() {
       if (proceed) {
         context.modelService.get(pkValue).then(function (resource) {
           // The returned resource, will be, by default an Model (@core/model) instance, that supports instance methods, like $save, $destroy etc
-          context.vm.resource = resource;
+          context.vm.resource = resource; // runs the optional after callback (if the function is defined in the Vue component) an pass the data
 
-          // runs the optional after callback (if the function is defined in the Vue component) an pass the data
-          context.runAfterCallBack('afterGet', context.vm.resource);
-
-          // In the default CRUD usage, it is not necessary to
+          context.runAfterCallBack('afterGet', context.vm.resource); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.
           // context is not a problem!
+
           resolve(context.vm.resource);
         }, function (errorResponse) {
           // Handle the error response
-          context.handleError(errorResponse, context.options.getFailedMsg, context.vm.$t('crud.failWhileTryingToGetTheResource'));
-
-          // In the default CRUD usage, it is not necessary to
+          context.handleError(errorResponse, context.options.getFailedMsg, context.vm.$t('crud.failWhileTryingToGetTheResource')); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.
           // This is not a problem!
+
           reject(errorResponse);
         });
       }
@@ -2114,54 +1950,53 @@ var _initialiseProps = function _initialiseProps() {
   };
 
   this.save = function () {
-    var context = _this2;
-
-    // We return a promise and resolve/reject it because optionally, the developer
+    var context = _this2; // We return a promise and resolve/reject it because optionally, the developer
     // can have its own save method, and after it is finished do something special
+
     return new Promise(function (resolve, reject) {
       var validForm = context.formIsValid(reject);
       var proceed = context.runProceedCallBack('beforeSave', reject);
 
       if (validForm && proceed) {
         var postResource = context.vm.resource.$strip(context.vm.resource);
+
         if (Object.keys(postResource).length === 0) {
           var msg = context.options.resourceEmptyMsg || context.vm.$t('crud.resourceEmptyMsg').replace(':resource', context.vm.resource.$getName());
-          context.vm.showError(context.capitalize(msg), { mode: 'multi-line' });
+          context.vm.showError(context.capitalize(msg), {
+            mode: 'multi-line'
+          });
           reject(msg);
         } else {
           context.vm.resource.$save().then(function (data) {
             // the return is an object containing a resource/Model instance and a (optional) message property
-            context.vm.resource = data.resource;
+            context.vm.resource = data.resource; // Define the save confirmation message to be displayed
 
-            // Define the save confirmation message to be displayed
-            var msg = data.message || context.options.savedMsg || context.vm.$t('crud.resourceSaved').replace(':resource', context.vm.resource.$getName());
+            var msg = data.message || context.options.savedMsg || context.vm.$t('crud.resourceSaved').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
 
-            // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
-            context.vm.showSuccess(context.capitalize(msg), { mode: 'multi-line' });
+            context.vm.showSuccess(context.capitalize(msg), {
+              mode: 'multi-line'
+            }); // Reload the data listed
 
-            // Reload the data listed
             if (!context.options.skipAutoIndexAfterSave && !context.options.skipAutoIndexAfterAllEvents) {
               context.vm.index();
-            }
+            } // runs the optional after callback (if the function is defined in the Vue component) an pass the data
 
-            // runs the optional after callback (if the function is defined in the Vue component) an pass the data
-            context.runAfterCallBack('afterSave', context.vm.resource);
 
-            // In the default CRUD usage, it is not necessary to
+            context.runAfterCallBack('afterSave', context.vm.resource); // In the default CRUD usage, it is not necessary to
             // listen to the promise result
             // if the promise is not being listened
             // it can raise an error when rejected/resolved.
             // This is not a problem!
+
             resolve(context.vm.resource);
           }, function (errorResponse) {
             // Handle the error response
-            context.handleError(errorResponse, context.options.saveFailedMsg, context.vm.$t('crud.failWhileTryingToSaveResource'));
-
-            // In the default CRUD usage, it is not necessary to
+            context.handleError(errorResponse, context.options.saveFailedMsg, context.vm.$t('crud.failWhileTryingToSaveResource')); // In the default CRUD usage, it is not necessary to
             // listen to the promise result
             // if the promise is not being listened
             // it can raise an error when rejected/resolved.
             // This is not a problem!
+
             reject(errorResponse);
           });
         }
@@ -2178,37 +2013,34 @@ var _initialiseProps = function _initialiseProps() {
       if (validForm && proceed) {
         context.vm.resource.$update().then(function (data) {
           // the return is an object containing a resource/Model instance and a (optional) message property
-          context.vm.resource = data.resource;
+          context.vm.resource = data.resource; // Define the save confirmation message to be displayed
 
-          // Define the save confirmation message to be displayed
-          var msg = data.message || context.options.updatedMsg || context.vm.$t('crud.resourceUpdated').replace(':resource', context.vm.resource.$getName());
+          var msg = data.message || context.options.updatedMsg || context.vm.$t('crud.resourceUpdated').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
 
-          // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
-          context.vm.showSuccess(context.capitalize(msg), { mode: 'multi-line' });
+          context.vm.showSuccess(context.capitalize(msg), {
+            mode: 'multi-line'
+          }); // Reload the data listed
 
-          // Reload the data listed
           if (!context.options.skipAutoIndexAfterUpdate && !context.options.skipAutoIndexAfterAllEvents) {
             context.vm.index();
-          }
+          } // runs the optional after callback (if the function is defined in the Vue component) an pass the data
 
-          // runs the optional after callback (if the function is defined in the Vue component) an pass the data
-          context.runAfterCallBack('afterUpdate', context.vm.resource);
 
-          // In the default CRUD usage, it is not necessary to
+          context.runAfterCallBack('afterUpdate', context.vm.resource); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.
           // This is not a problem!
+
           resolve(context.vm.resource);
         }, function (errorResponse) {
           // Handle the error response
-          context.handleError(errorResponse, context.options.updateFailedMsg, context.vm.$t('crud.failWhileTryingToUpdateResource'));
-
-          // In the default CRUD usage, it is not necessary to
+          context.handleError(errorResponse, context.options.updateFailedMsg, context.vm.$t('crud.failWhileTryingToUpdateResource')); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.
           // This is not a problem!
+
           reject(errorResponse);
         });
       }
@@ -2219,16 +2051,13 @@ var _initialiseProps = function _initialiseProps() {
     var context = _this2;
     return new Promise(function (resolve, reject) {
       // Define the conformation modal title to be displayed before destroying
-      var confirmTitle = context.options.confirmDestroyTitle || context.vm.$t('crud.removalConfirmTitle');
+      var confirmTitle = context.options.confirmDestroyTitle || context.vm.$t('crud.removalConfirmTitle'); // Define the conformation modal text to be displayed before destroying
 
-      // Define the conformation modal text to be displayed before destroying
-      var confirmMessage = context.options.confirmDestroyText || context.vm.$t('crud.doYouReallyWantToRemove').replace(':resource', context.vm.resource.$getName());
+      var confirmMessage = context.options.confirmDestroyText || context.vm.$t('crud.doYouReallyWantToRemove').replace(':resource', context.vm.resource.$getName()); // Open the confirmation modal and wait for the response in a promise
 
-      // Open the confirmation modal and wait for the response in a promise
       context.vm.confirmDialog(confirmTitle, confirmMessage).then(function () {
         // if the user confirms the destroy, run it
-        context.vm.destroy(resource).then(
-        // In the default CRUD usage, it is not necessary to
+        context.vm.destroy(resource).then( // In the default CRUD usage, it is not necessary to
         // listen to the promise result
         // if the promise is not being listened
         // it can raise an error when rejected/resolved.
@@ -2237,16 +2066,14 @@ var _initialiseProps = function _initialiseProps() {
       }, function (error) {
         // If the user has clicked `no` in the dialog, abort the destroy and show an aborted message
         // Define the error message to be displayed
-        var msg = context.options.destroyAbortedMsg || context.vm.$t('crud.destroyAborted');
+        var msg = context.options.destroyAbortedMsg || context.vm.$t('crud.destroyAborted'); // show the abort message as an info
 
-        // show the abort message as an info
-        context.vm.showInfo(msg);
-
-        // In the default CRUD usage, it is not necessary to
+        context.vm.showInfo(msg); // In the default CRUD usage, it is not necessary to
         // listen to the promise result
         // if the promise is not being listened
         // it can raise an error when rejected/resolved.
         // This is not a problem!
+
         reject(error);
       });
     });
@@ -2260,34 +2087,32 @@ var _initialiseProps = function _initialiseProps() {
       if (proceed) {
         resource.$destroy().then(function (data) {
           // Define the save confirmation message to be displayed
-          var msg = data.message || context.options.destroyedMsg || context.vm.$t('crud.resourceDestroyed').replace(':resource', context.vm.resource.$getName());
+          var msg = data.message || context.options.destroyedMsg || context.vm.$t('crud.resourceDestroyed').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
 
-          // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
-          context.vm.showSuccess(context.capitalize(msg), { mode: 'multi-line' });
+          context.vm.showSuccess(context.capitalize(msg), {
+            mode: 'multi-line'
+          }); // Reload the data listed
 
-          // Reload the data listed
           if (!context.options.skipAutoIndexAfterDestroy && !context.options.skipAutoIndexAfterAllEvents) {
             context.vm.index();
-          }
+          } // runs the optional after callback (if the function is defined in the Vue component) an pass the data
 
-          // runs the optional after callback (if the function is defined in the Vue component) an pass the data
-          context.runAfterCallBack('afterDestroy', resource);
 
-          // In the default CRUD usage, it is not necessary to
+          context.runAfterCallBack('afterDestroy', resource); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.
           // This is not a problem!
+
           resolve();
         }, function (errorResponse) {
           // Handle the error response
-          context.handleError(errorResponse, context.options.destroyFailedMsg, context.vm.$t('crud.failWhileTryingToDestroyResource'));
-
-          // In the default CRUD usage, it is not necessary to
+          context.handleError(errorResponse, context.options.destroyFailedMsg, context.vm.$t('crud.failWhileTryingToDestroyResource')); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.
           // This is not a problem!
+
           reject(errorResponse);
         });
       }
@@ -2300,23 +2125,21 @@ var CRUDData = {
   resources: [],
   crudReady: false,
   modelService: null
+}; // Export the CRUD and the CRUDData objects
 
-  // Export the CRUD and the CRUDData objects
-};exports.CRUD = CRUD;
 exports.CRUDData = CRUDData;
 
-},{"./form":29,"./i18n/crud.i18n.en":30}],28:[function(require,module,exports){
-'use strict';
+},{"./form-helper":29,"./i18n/crud.i18n.en":30}],28:[function(require,module,exports){
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _axios = require('axios');
+var _axios = _interopRequireDefault(require("axios"));
 
-var _axios2 = _interopRequireDefault(_axios);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -2345,15 +2168,19 @@ function CrudHttp() {
   this.setDefaultOptions = function () {
     _this.options.baseURL = _this.options.baseURL || '';
     _this.options.showLoadingEventName = _this.options.showLoadingEventName || 'showLoading';
+
     _this.options.isAuthenticated = _this.options.isAuthenticated || function () {
       return false;
     };
+
     _this.options.getBearerToken = _this.options.getBearerToken || function () {
       return null;
     };
+
     _this.options.geLocale = _this.options.geLocale || function () {
       return null;
     };
+
     _this.options.getVueInstance = _this.options.getVueInstance || function () {
       return console.error('the vue instance getting function was not defined');
     };
@@ -2371,18 +2198,19 @@ function CrudHttp() {
 
   this.requestInterceptors = function (config) {
     var vueInstance = _this.options.getVueInstance();
+
     if (vueInstance) {
       // if yes, show the loading and add the authorization header
       if (vueInstance.eventBus) {
         vueInstance.eventBus.$emit(_this.options.showLoadingEventName, true);
-      }
+      } // Set/increase the pending request counter
 
-      // Set/increase the pending request counter
+
       vueInstance.$pendingRequest = vueInstance.$pendingRequest ? vueInstance.$pendingRequest + 1 : 1;
-    }
-
-    // Before each request, we check if the user is authenticated
+    } // Before each request, we check if the user is authenticated
     // This store isAuthenticated getter relies on the @/common/auth/auth.store.js module
+
+
     if (_this.options.isAuthenticated()) {
       config.headers.common['Authorization'] = 'Bearer ' + _this.options.getBearerToken();
     }
@@ -2392,34 +2220,36 @@ function CrudHttp() {
     if (_this.options.appendLocaleToHeader && currentLocale) {
       config.headers.common['locale'] = _this.options.geLocale();
     }
+
     if (_this.options.appendLocaleToGetUrl) {
       var lUrlKey = _this.options.urlLocalKey;
-      var urlQueryString = '=' + lUrlKey;
+      var urlQueryString = "=".concat(lUrlKey); // Check if the locael query string should be added
 
-      // Check if the locael query string should be added
       if (config.method === 'get' && config.url.indexOf(urlQueryString) === -1 && currentLocale) {
         if (config.url.indexOf('?') > -1) {
-          config.url += '&' + lUrlKey + '=' + currentLocale;
+          config.url += "&".concat(lUrlKey, "=").concat(currentLocale);
         } else {
-          config.url += '?' + lUrlKey + '=' + currentLocale;
+          config.url += "?".concat(lUrlKey, "=").concat(currentLocale);
         }
       }
     }
+
     return config; // you have to return the config, otherwise the request wil be blocked
   };
 
   this.responseInterceptors = function (response) {
     var vueInstance = _this.options.getVueInstance();
+
     if (vueInstance) {
       // Decrease the pending request counter
-      vueInstance.$pendingRequest--;
-
-      // If the the pending request counter is zero, so
+      vueInstance.$pendingRequest--; // If the the pending request counter is zero, so
       // we can hide the progress bar
+
       if (vueInstance.$pendingRequest === 0 && vueInstance.eventBus) {
         vueInstance.eventBus.$emit(_this.options.showLoadingEventName, false);
       }
     }
+
     response = response.response || response;
     response.data = response.data || {};
     return response;
@@ -2427,17 +2257,18 @@ function CrudHttp() {
 
   this.responseErrorInterceptors = function (response) {
     var vueInstance = _this.options.getVueInstance();
+
     return new Promise(function (resolve, reject) {
       if (vueInstance) {
         // Decrease the pending request counter
-        vueInstance.$pendingRequest--;
-
-        // If the the pending request counter is zero, so
+        vueInstance.$pendingRequest--; // If the the pending request counter is zero, so
         // we can hide the progress bar
+
         if (vueInstance.$pendingRequest === 0 && vueInstance.eventBus) {
           vueInstance.eventBus.$emit(_this.options.showLoadingEventName, false);
         }
       }
+
       response = response.response || response;
       response.data = response.data || {};
       reject(response);
@@ -2445,56 +2276,40 @@ function CrudHttp() {
   };
 
   this.options = options;
-  this.setDefaultOptions();
+  this.setDefaultOptions(); // Build an axios object
 
-  // Build an axios object
-  var httpApi = _axios2.default.create({
+  var httpApi = _axios["default"].create({
     baseURL: options.baseURL,
     headers: {}
   });
+
   httpApi.interceptors.request.use(this.requestInterceptors);
   httpApi.interceptors.response.use(this.responseInterceptors, this.responseErrorInterceptors);
   this.http = httpApi;
 }
-
 /**
  * Set default options
  */
-
-
-/**
- * Modifies the request before it is sent
- *
- * @param {} config
- */
-
-
-/**
- * Modifies the response after it is returned
- * @param {*} response
- */
-
-
-/**
- * Modifies the error/fail response after it is finished
- * @param {*} response
- */
 ;
 
-exports.default = CrudHttp;
+var _default = CrudHttp;
+exports["default"] = _default;
 
 },{"axios":1}],29:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+exports["default"] = void 0;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var CrudForm = function () {
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var CrudForm = /*#__PURE__*/function () {
   function CrudForm(formRef, context, options) {
     _classCallCheck(this, CrudForm);
 
@@ -2502,7 +2317,6 @@ var CrudForm = function () {
     this.vm = context;
     this.options = options || {};
   }
-
   /**
    * Validate a form by running the default form validate and addition check for required field
    * If any field is invalid, sets the field as invalid, set it error message and shows a toaster with the error
@@ -2510,27 +2324,29 @@ var CrudForm = function () {
 
 
   _createClass(CrudForm, [{
-    key: 'validate',
+    key: "validate",
     value: function validate() {
       if (this.options.skipFormValidation) {
         return true;
       }
-      var validForm = this.formRef.validate();
 
-      // Validate the native `required` input attribute
+      var validForm = this.formRef.validate(); // Validate the native `required` input attribute
       // that is not validated by the form.validate()
+
       if (!this.validateRequiredFields()) {
         validForm = false;
       }
 
       if (!validForm && !this.options.skipShowValidationMsg) {
-        var errorMsg = this.options.invalidForm || this.vm.$t('crud.invalidForm');
-        // as we are not sure about the error message size, use multi-line model for the toaster
-        this.vm.showError(this.capitalize(errorMsg), { mode: 'multi-line' });
+        var errorMsg = this.options.invalidForm || this.vm.$t('crud.invalidForm'); // as we are not sure about the error message size, use multi-line model for the toaster
+
+        this.vm.showError(this.capitalize(errorMsg), {
+          mode: 'multi-line'
+        });
       }
+
       return validForm;
     }
-
     /**
      * Validate the required input attribute
      *
@@ -2540,7 +2356,7 @@ var CrudForm = function () {
      */
 
   }, {
-    key: 'validateRequiredFields',
+    key: "validateRequiredFields",
     value: function validateRequiredFields() {
       var _this = this;
 
@@ -2549,13 +2365,14 @@ var CrudForm = function () {
         // We only validate the  required attribute if the input is not yet invalid
         if (input.valid && input.required && (input.inputValue === undefined || input.inputValue === null || input.inputValue === '')) {
           input.valid = validForm = false;
-          var errorMsg = input.label + ' ' + _this.vm.$t('crud.required') || _this.vm.$t('crud.inputRequired');
+
+          var errorMsg = "".concat(input.label, " ").concat(_this.vm.$t('crud.required')) || _this.vm.$t('crud.inputRequired');
+
           input.errorBucket.push(errorMsg);
         }
       });
       return validForm;
     }
-
     /**
      * Retrieve all the form inputs
      *
@@ -2565,26 +2382,28 @@ var CrudForm = function () {
      */
 
   }, {
-    key: 'getInputs',
+    key: "getInputs",
     value: function getInputs(form) {
       var results = [];
+
       var search = function search(children) {
         var depth = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 
         for (var index = 0; index < children.length; index++) {
           var child = children[index];
+
           if (child.errorBucket !== undefined) {
             results.push(child);
           } else {
             search(child.$children, depth + 1);
           }
         }
+
         if (depth === 0) return results;
       };
 
       return search(form.$children);
     }
-
     /**
      * Capitalize a string
      *
@@ -2593,7 +2412,7 @@ var CrudForm = function () {
      */
 
   }, {
-    key: 'capitalize',
+    key: "capitalize",
     value: function capitalize(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
     }
@@ -2602,15 +2421,17 @@ var CrudForm = function () {
   return CrudForm;
 }();
 
-exports.default = CrudForm;
+var _default = CrudForm;
+exports["default"] = _default;
 
 },{}],30:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = {
+exports["default"] = void 0;
+var _default = {
   crud: {
     failWhileTryingToGetTheResource: 'It was not possible to get the :resource(s)',
     failWhileTryingToSaveResource: 'It was not possible to save the :resource',
@@ -2629,49 +2450,69 @@ exports.default = {
     required: 'required'
   }
 };
+exports["default"] = _default;
 
 },{}],31:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+Object.defineProperty(exports, "CrudHttpApi", {
+  enumerable: true,
+  get: function get() {
+    return _crudHttpApi["default"];
+  }
+});
+Object.defineProperty(exports, "CRUDController", {
+  enumerable: true,
+  get: function get() {
+    return _crudController["default"];
+  }
+});
+Object.defineProperty(exports, "FormHelper", {
+  enumerable: true,
+  get: function get() {
+    return _formHelper["default"];
+  }
+});
+Object.defineProperty(exports, "ModelService", {
+  enumerable: true,
+  get: function get() {
+    return _modelService["default"];
+  }
+});
+Object.defineProperty(exports, "Model", {
+  enumerable: true,
+  get: function get() {
+    return _model["default"];
+  }
+});
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _crudHttpApi = _interopRequireDefault(require("./crud-http-api.js"));
 
-var _crudHttpApi = require('./crud-http-api.js');
+var _crudController = _interopRequireDefault(require("./crud-controller.js"));
 
-var _crudHttpApi2 = _interopRequireDefault(_crudHttpApi);
+var _formHelper = _interopRequireDefault(require("./form-helper.js"));
 
-var _crudController = require('./crud-controller.js');
+var _modelService = _interopRequireDefault(require("./model-service.js"));
 
-var _crudController2 = _interopRequireDefault(_crudController);
+var _model = _interopRequireDefault(require("./model.js"));
 
-var _form = require('./form.js');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _form2 = _interopRequireDefault(_form);
-
-var _modelService = require('./model-service.js');
-
-var _modelService2 = _interopRequireDefault(_modelService);
-
-var _model = require('./model.js');
-
-var _model2 = _interopRequireDefault(_model);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 var VueRestCrud = {
-  CrudHttpApi: _crudHttpApi2.default,
-  CRUD: _crudController2.default,
-  CrudForm: _form2.default,
-  ModelService: _modelService2.default,
-  Model: _model2.default
+  CrudHttpApi: _crudHttpApi["default"],
+  CRUD: _crudController["default"],
+  FormHelper: _formHelper["default"],
+  ModelService: _modelService["default"],
+  Model: _model["default"]
+}; // Define VueRestCrud for Node module pattern loaders, including Browserify
 
-  // Define VueRestCrud for Node module pattern loaders, including Browserify
-};if ((typeof module === 'undefined' ? 'undefined' : _typeof(module)) === 'object' && _typeof(module.exports) === 'object') {
-  module.exports = Openrouteservice;
-  // define VueRestCrud as an AMD module
+if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && _typeof(module.exports) === 'object') {
+  module.exports = Openrouteservice; // define VueRestCrud as an AMD module
   // eslint-disable-next-line no-undef
 } else if (typeof define === 'function' && define.amd) {
   // eslint-disable-next-line no-undef
@@ -2682,26 +2523,21 @@ if (typeof window !== 'undefined') {
   window.VueRestCrud = VueRestCrud;
 }
 
-exports.default = VueRestCrud;
-
-},{"./crud-controller.js":27,"./crud-http-api.js":28,"./form.js":29,"./model-service.js":32,"./model.js":33}],32:[function(require,module,exports){
-'use strict';
+},{"./crud-controller.js":27,"./crud-http-api.js":28,"./form-helper.js":29,"./model-service.js":32,"./model.js":33}],32:[function(require,module,exports){
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _crudHttpApi = _interopRequireDefault(require("./crud-http-api"));
 
-var _crudHttpApi = require('./crud-http-api');
+var _model = _interopRequireDefault(require("./model"));
 
-var _crudHttpApi2 = _interopRequireDefault(_crudHttpApi);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _model = require('./model');
-
-var _model2 = _interopRequireDefault(_model);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 /**
  * Model service class that allows the running of REST api actions in a remote server for a defined endpoint resource.
@@ -2727,17 +2563,16 @@ function ModelService(endPoint, resourceName, options) {
 
   // if options is not passed, initialize it
   options = options || {};
-
   this.endPoint = endPoint;
   this.endPointTemplate = endPoint;
   this.resourceName = resourceName;
   this.options = options;
-  var crudHttp = new _crudHttpApi2.default(options.http);
+  var crudHttp = new _crudHttpApi["default"](options.http);
   this.httpApi = crudHttp.http;
-
   /**
    * Provides an accessor to get the name of the resource
    */
+
   this.getName = function () {
     return resourceName;
   };
@@ -2745,71 +2580,83 @@ function ModelService(endPoint, resourceName, options) {
    * Clone the current model service
    * @returns {ModelService} service
    */
+
+
   this.clone = function () {
     var service = new ModelService(_this.endPoint, _this.resourceName, _this.options);
     return service;
   };
-
   /**
    * Provides an accessor to get the endpoint
    * @param String append
    * @param String prepend
    */
+
+
   this.getEndPoint = function (append, prepend) {
     var baseEndPoint = _this.endPoint;
+
     if (append) {
-      baseEndPoint = baseEndPoint + '/' + append;
+      baseEndPoint = "".concat(baseEndPoint, "/").concat(append);
     }
+
     if (prepend) {
-      baseEndPoint = prepend + '/' + baseEndPoint;
+      baseEndPoint = "".concat(prepend, "/").concat(baseEndPoint);
     }
+
     return baseEndPoint;
   };
-
   /**
    * Provides an accessor to get the endpoint template
    * @param String append
    * @param String prepend
    */
+
+
   this.getEndPointTemplate = function () {
     return _this.endPointTemplate;
   };
-
   /**
    * Provides an accessor to set the endpoint
    * @param String endPoint
    */
+
+
   this.setEndPoint = function (endPoint) {
     _this.endPoint = endPoint;
   };
-
   /**
    * Queries the model service endpoint, retrieve the resources and (by default) transform them in active record Models
    * @param {*} filters  filters to be applied to retrieve the resources
    */
+
+
   this.query = function (filters) {
     var endpointAppend = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-
     var http = _this.httpApi;
     return new Promise(function (resolve, reject) {
       var endPoint = _this.endPoint + endpointAppend;
       endPoint += _this.buildParams(filters);
-      var request = { endPoint: endPoint, filters: filters, running: 'query'
+      var request = {
+        endPoint: endPoint,
+        filters: filters,
+        running: 'query'
+      }; // if the transform request is defined, run it
 
-        // if the transform request is defined, run it
-      };if (options.transformRequest) {
+      if (options.transformRequest) {
         options.transformRequest(request);
-      }
-      // run the get action using the http client
+      } // run the get action using the http client
+
+
       http.get(request.endPoint, request.filters).then(function (response) {
         // add the filters applied to the response so it can be used in some business logic
-        response.filtersApplied = filters;
+        response.filtersApplied = filters; // if the transform response is defined, run it
 
-        // if the transform response is defined, run it
         if (options.transformResponse) {
           options.transformResponse(response);
-        }
-        // if the raw option is defined, skip the transformation to Model and resolve the promise
+        } // if the raw option is defined, skip the transformation to Model and resolve the promise
+
+
         if (options.raw === true) {
           response.raw = true;
           resolve(response);
@@ -2821,12 +2668,11 @@ function ModelService(endPoint, resourceName, options) {
         }
       }, function (error) {
         reject(error);
-      }).catch(function (error) {
+      })["catch"](function (error) {
         reject(error);
       });
     });
   };
-
   /**
    * Queries the model service endpoint, retrieve the resources and (by default) transform them in active record Models
    * @param {*} customOptions  options to be applied to the request. The following options attributes can defined:
@@ -2836,40 +2682,42 @@ function ModelService(endPoint, resourceName, options) {
    *  - transformRequest: function to be called back on transformRequest event
    * @param {*} endPoint  the endpoint to which the request will be made
    */
+
+
   this.customQuery = function (customOptions, endPoint) {
-    var cOptions = customOptions || options;
+    var cOptions = customOptions || options; // set the raw option
 
-    // set the raw option
     cOptions.raw = cOptions.raw === undefined ? options.raw : cOptions.raw;
-
     var http = _this.httpApi;
     return new Promise(function (resolve, reject) {
       endPoint = endPoint || _this.getEndPoint();
+      var request = {
+        endPoint: endPoint,
+        query: cOptions.query,
+        running: 'customQuery',
+        data: cOptions.data
+      };
+      request.endPoint += _this.buildParams(request.query); // set the verb (from options or default)
 
-      var request = { endPoint: endPoint, query: cOptions.query, running: 'customQuery', data: cOptions.data };
+      request.verb = cOptions.verb || 'get'; // if the transform request is defined, run it
 
-      request.endPoint += _this.buildParams(request.query);
-
-      // set the verb (from options or default)
-      request.verb = cOptions.verb || 'get';
-
-      // if the transform request is defined, run it
       if (cOptions.transformRequest) {
         options.transformRequest(request);
-      }
+      } // run the get action using the http client
 
-      // run the get action using the http client
+
       http[request.verb](request.endPoint, request.data).then(function (response) {
         // if the transform response is defined, run it
         if (cOptions.transformResponse) {
           options.transformResponse(response);
-        }
+        } // if the raw option is defined, skip the transformation to Model and resolve the promise
 
-        // if the raw option is defined, skip the transformation to Model and resolve the promise
+
         if (cOptions.raw === true) {
           if (_typeof(response.data) === 'object') {
             response.data.httpStatusCode = response.status;
           }
+
           response.raw = true;
           resolve(response.data);
         } else {
@@ -2880,33 +2728,34 @@ function ModelService(endPoint, resourceName, options) {
         }
       }, function (error) {
         reject(error);
-      }).catch(function (error) {
+      })["catch"](function (error) {
         reject(error);
       });
     });
   };
-
   /**
    * Retrieve a single specified resource from the service endpoint
    * @param string|numeric id
    */
+
+
   this.get = function (pkValue) {
     var http = _this.httpApi;
     return new Promise(function (resolve, reject) {
-      var endPoint = _this.endPoint + '/' + pkValue;
+      var endPoint = "".concat(_this.endPoint, "/").concat(pkValue);
+      var request = {
+        endPoint: endPoint,
+        running: 'get'
+      }; // if the transform request is defined, run it
 
-      var request = { endPoint: endPoint, running: 'get'
-
-        // if the transform request is defined, run it
-      };if (options.transformRequest) {
+      if (options.transformRequest) {
         options.transformRequest(request);
       }
 
       http.get(request.endPoint).then(function (response) {
         // add the pkValue used to the response so it can be used in some business logic
-        response.pkValue = pkValue;
+        response.pkValue = pkValue; // if the transform response is defined, run it
 
-        // if the transform response is defined, run it
         if (options.transformResponse) {
           options.transformResponse(response);
         }
@@ -2917,100 +2766,109 @@ function ModelService(endPoint, resourceName, options) {
         } else {
           // transform the resource returned in a active record Model
           // @see @/core/model to read more
-          var model = new _model2.default(response.data, _this.endPoint, _this.resourceName, _this.options);
+          var model = new _model["default"](response.data, _this.endPoint, _this.resourceName, _this.options);
           resolve(model);
         }
       }, function (error) {
         reject(error);
-      }).catch(function (error) {
+      })["catch"](function (error) {
         reject(error);
       });
     });
   };
-
   /**
    * Build url params based in an object
    * @param {*} obj
    */
+
+
   this.buildParams = function (obj) {
     if (obj === undefined || obj === null) {
       return '';
     }
+
     var str = Object.keys(obj).map(function (key) {
       return key + '=' + obj[key];
     }).join('&');
+
     if (str && str.length > 0) {
       str = '?' + str;
     }
+
     return str;
   };
-
   /**
-   * Create a new active record Model instance
+   * Create a new active record Model instance using a 
+   * raw object and the model service configuration.
+   * @param {Object} rawObject
    * @returns Model
    */
+
+
   this.newModelInstance = function () {
-    return new _model2.default(null, _this.endPoint, _this.resourceName, _this.options);
+    var rawObject = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    return new _model["default"](rawObject, _this.endPoint, _this.resourceName, _this.options);
   };
 
   return this;
 }
-
 /**
  * Transform the raw returned data in a active record Model
  * @param {*} rawObj
  * @param {*} arrayInst
  * @param {*} context
  */
+
+
 var wrapAsNewModelInstance = function wrapAsNewModelInstance(rawObj, arrayInst, context) {
   // create an instance
-  var instance = rawObj.constructor === _model2.default ? rawObj : new _model2.default(rawObj, context.endPoint, context.resourceName, context.options);
+  var instance = rawObj.constructor === _model["default"] ? rawObj : new _model["default"](rawObj, context.endPoint, context.resourceName, context.options); // set a pointer to the array
 
-  // set a pointer to the array
   instance.$$array = arrayInst;
-
   return instance;
 };
-
 /**
  * Transform the raw returned data collection in a array of active record Models
  * @param {*} value
  * @param {*} context
  */
-var modelCollection = function modelCollection(value, context) {
-  value = Array.isArray(value) ? value : [];
 
-  // Transform each value item in a Model object with active record strategy
+
+var modelCollection = function modelCollection(value, context) {
+  value = Array.isArray(value) ? value : []; // Transform each value item in a Model object with active record strategy
+
   value.forEach(function (v, i) {
     // this should not happen but prevent blow up
-    if (v === null || v === undefined) return;
-    // reset to new instance
+    if (v === null || v === undefined) return; // reset to new instance
+
     value[i] = wrapAsNewModelInstance(v, value, context);
   });
   return value;
-};
+}; // export the model Service class
 
-// export the model Service class
-exports.default = ModelService;
+
+var _default = ModelService;
+exports["default"] = _default;
 
 },{"./crud-http-api":28,"./model":33}],33:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _crudHttpApi = _interopRequireDefault(require("./crud-http-api"));
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _crudHttpApi = require('./crud-http-api');
-
-var _crudHttpApi2 = _interopRequireDefault(_crudHttpApi);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 /**
  * Model class that acts as an active record representation of the resource in a remote server
@@ -3025,7 +2883,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  *   request interceptor!
  * - transformResponse (function): executed after the request is made, passing the original response object received.
  */
-var Model = function () {
+var Model = /*#__PURE__*/function () {
   /**
    *Creates an instance of Model.
    * @param {*} value
@@ -3042,22 +2900,18 @@ var Model = function () {
     this.$options = options;
     this.$endPoint = endPoint;
     this.$name = resourceName;
+    var crudApi = new _crudHttpApi["default"](options.http);
+    this.$http = crudApi.http; // If the value is undefined, create a empty obj
 
-    var crudApi = new _crudHttpApi2.default(options.http);
-    this.$http = crudApi.http;
+    value = value || {}; // Transform the empty Model object in a Model with values (active record)
 
-    // If the value is undefined, create a empty obj
-    value = value || {};
-
-    // Transform the empty Model object in a Model with values (active record)
     this.$extend(this, value);
-
     /**
      * Instance function and attributes that must be removed before sending to the remote server
      */
+
     this.$instanceKeywords = ['$extend', '$save', '$post', '$destroy', '$pending', '$update', '$copy', '$getName', '$strip', '$options', '$name', '$endPoint', '$create', '$setEndpoint', '$clean', '$parseRequest', '$instanceKeywords', '$http'];
   }
-
   /**
    * Get the model nice name
    *
@@ -3065,16 +2919,8 @@ var Model = function () {
    */
 
 
-  /**
-   * Set the endpoint
-   * @param value
-   * @memberof Model
-   */
-
-
   _createClass(Model, [{
-    key: '$extend',
-
+    key: "$extend",
 
     /**
      * Extends a resource object based in a value object
@@ -3082,7 +2928,7 @@ var Model = function () {
      * @param {*} value
      */
     value: function $extend(instance, value) {
-      if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
+      if (_typeof(value) === 'object') {
         for (var key in value) {
           // Check also if property is not inherited from prototype
           if (value.hasOwnProperty(key)) {
@@ -3091,67 +2937,10 @@ var Model = function () {
         }
       }
     }
-
     /**
      * Extends a resource object based in a value object
      * @param {*} instance
      * @param {*} value
-     */
-
-
-    /**
-     * Creates or updates the resource instance in the server, depending on the primary key be null or have a value
-     */
-
-
-    /**
-     * Post a request to the server
-     *
-     * @param {Object} {endPoint: String, filters: {}, resource: {}, running: String, endPointAppend: String}
-     * @returns {Promise}
-     */
-
-
-    /**
-     * Parse an request object, setting the default is not defined
-     *
-     * @memberof Model
-     * @param {Request}
-     * @returns {Request}
-     */
-
-
-    /**
-     * Creates the resource instance in the server
-     *
-     * @returns {Promise}
-     */
-
-
-    /**
-     * Performs a DELETE on this instance running
-     * the delete action in the server passing the instance id
-     *
-     * If the item is associated with an array, it will automatically be removed
-     * on successful delete.
-     */
-
-
-    /**
-     * Update a resource
-     */
-
-
-    /**
-     * Stript reserved methods and attributes
-     * @param {*} resource
-     */
-
-
-    /**
-     * Clean the resource removing reserved methods and attributes and empty attributes
-     * The empty attributes action can be disabled by setting the sendEmptyAttributes option equals true
-     * @param {*} resource
      */
 
   }]);
@@ -3172,17 +2961,20 @@ var _initialiseProps = function _initialiseProps() {
 
   this.$copy = function () {
     var copied = {};
+
     for (var key in _this) {
       // Check also if property is not inherited from prototype
       if (_this.hasOwnProperty(key)) {
         copied[key] = _this[key];
       }
     }
+
     return copied;
   };
 
   this.$save = function () {
     var pk = _this.$options.pk || 'id';
+
     if (_this[pk] && _this[pk] !== false && _this[pk] !== '') {
       return _this.$update();
     } else {
@@ -3199,19 +2991,25 @@ var _initialiseProps = function _initialiseProps() {
       if (instance.$options.transformRequest) {
         instance.$options.transformRequest(request);
       }
+
       instance.$http.post(request.endPoint, request.resource).then(function (response) {
         instance.$pending = false;
 
         if (instance.$options.transformResponse) {
           instance.$options.transformResponse(response);
-        }
-        // Extend the value from the server to me
+        } // Extend the value from the server to me
+
+
         if (response.data) {
           instance.$extend(instance, response.data);
         }
-        var data = { resource: instance, message: response.data.message };
+
+        var data = {
+          resource: instance,
+          message: response.data.message
+        };
         resolve(data);
-      }).catch(function (error) {
+      })["catch"](function (error) {
         instance.$pending = true;
         console.log(error);
         reject(error);
@@ -3221,6 +3019,7 @@ var _initialiseProps = function _initialiseProps() {
 
   this.$parseRequest = function (request) {
     request = request || {};
+
     if (!request.endPoint && request.endPointAppend) {
       request.endPoint = _this.$endPoint + request.endPointAppend;
     }
@@ -3228,30 +3027,44 @@ var _initialiseProps = function _initialiseProps() {
     if (!request.resource) {
       request.resource = _this.$clean(_this);
     }
+
     return request;
   };
 
   this.$create = function () {
-    var request = { endPoint: _this.$endPoint, filters: {}, resource: _this.$clean(_this), running: 'create'
-      // $post will return a promise
-    };return _this.$post(request);
+    var request = {
+      endPoint: _this.$endPoint,
+      filters: {},
+      resource: _this.$clean(_this),
+      running: 'create'
+    }; // $post will return a promise
+
+    return _this.$post(request);
   };
 
   this.$destroy = function () {
-    var request = { endPoint: _this.$endPoint, filters: {}, resource: _this.$clean(_this), running: 'destroy' };
+    var request = {
+      endPoint: _this.$endPoint,
+      filters: {},
+      resource: _this.$clean(_this),
+      running: 'destroy'
+    };
+
     if (_this.$options.transformRequest) {
       _this.$options.transformRequest(request);
     }
 
     var pk = _this.$options.pk || 'id';
-
-    var destroyEndPoint = request.endPoint + '/' + request.resource[pk];
+    var destroyEndPoint = "".concat(request.endPoint, "/").concat(request.resource[pk]);
     var instance = _this;
     return new Promise(function (resolve, reject) {
-      instance.$http.delete(destroyEndPoint).then(function (response) {
-        var data = { resource: null, message: response.data.message };
+      instance.$http["delete"](destroyEndPoint).then(function (response) {
+        var data = {
+          resource: null,
+          message: response.data.message
+        };
         resolve(data);
-      }).catch(function (error) {
+      })["catch"](function (error) {
         reject(error);
       });
     });
@@ -3259,25 +3072,35 @@ var _initialiseProps = function _initialiseProps() {
 
   this.$update = function () {
     var instance = _this;
-    var request = { endPoint: _this.$endPoint, filters: {}, resource: _this.$clean(instance), running: 'update' };
+    var request = {
+      endPoint: _this.$endPoint,
+      filters: {},
+      resource: _this.$clean(instance),
+      running: 'update'
+    };
+
     if (instance.$options.transformRequest) {
       instance.$options.transformRequest(request);
     }
+
     var pk = instance.$options.pk || 'id';
-
-    var updateEndPoint = request.endPoint + '/' + request.resource[pk];
-
+    var updateEndPoint = "".concat(request.endPoint, "/").concat(request.resource[pk]);
     return new Promise(function (resolve, reject) {
       instance.$http.put(updateEndPoint, request.resource).then(function (response) {
         if (instance.$options.transformResponse) {
           instance.$options.transformResponse(response);
         }
+
         if (response.data) {
           instance.$extend(instance, response.data);
         }
-        var data = { resource: _this, message: response.data.message };
+
+        var data = {
+          resource: _this,
+          message: response.data.message
+        };
         resolve(data);
-      }).catch(function (error) {
+      })["catch"](function (error) {
         reject(error);
       });
     });
@@ -3285,7 +3108,8 @@ var _initialiseProps = function _initialiseProps() {
 
   this.$strip = function (resource) {
     var shallow = _this.$copy(resource);
-    if (shallow && (typeof shallow === 'undefined' ? 'undefined' : _typeof(shallow)) === 'object') {
+
+    if (shallow && _typeof(shallow) === 'object') {
       for (var key in shallow) {
         // check also if property is not inherited from prototype
         if (shallow.hasOwnProperty(key)) {
@@ -3295,12 +3119,14 @@ var _initialiseProps = function _initialiseProps() {
         }
       }
     }
+
     return shallow;
   };
 
   this.$clean = function (resource) {
     var shallow = _this.$strip(resource);
-    if (shallow && (typeof shallow === 'undefined' ? 'undefined' : _typeof(shallow)) === 'object') {
+
+    if (shallow && _typeof(shallow) === 'object') {
       for (var key in shallow) {
         // check also if property is not inherited from prototype
         if (shallow.hasOwnProperty(key)) {
@@ -3310,10 +3136,12 @@ var _initialiseProps = function _initialiseProps() {
         }
       }
     }
+
     return shallow;
   };
 };
 
-exports.default = Model;
+var _default = Model;
+exports["default"] = _default;
 
 },{"./crud-http-api":28}]},{},[31]);

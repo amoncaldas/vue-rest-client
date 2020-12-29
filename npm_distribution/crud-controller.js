@@ -84,9 +84,10 @@ var Controller = /*#__PURE__*/function () {
       }
 
       if (!transaltion && this.vm.$t) {
-        var trans = this.vm.$t("crud.".concat(key));
+        var translationPath = "crud.".concat(key);
+        var trans = this.vm.$t(translationPath);
 
-        if (trans !== key) {
+        if (trans !== translationPath) {
           transaltion = trans;
         }
       }

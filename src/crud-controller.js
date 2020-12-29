@@ -76,8 +76,10 @@ class Controller {
     }
     
     if (!transaltion && this.vm.$t) {
-      let trans = this.vm.$t(`crud.${key}`)
-      if (trans !== key) {
+      let translationPath = `crud.${key}`
+      let trans = this.vm.$t(translationPath)
+      
+      if (trans !== translationPath) {
         transaltion = trans
       }
     }

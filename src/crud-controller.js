@@ -117,7 +117,7 @@ class Controller {
     this.vm.update = this.update
     this.vm.destroy = this.destroy
     this.vm.confirmAndDestroy = this.confirmAndDestroy
-    this.vm.$t = this.options.translate || this.vm.$t || this.translate
+    this.vm.crudTranslate = this.options.translate || this.vm.$t || this.translate
     this.vm.showSuccess = this.options.showSuccess || this.vm.showSuccess || this.showSuccess
     this.vm.showInfo = this.options.showInfo || this.vm.showInfo || this.showSuccess
     this.vm.showError = this.options.showError || this.vm.showError || this.showSuccess
@@ -177,7 +177,7 @@ class Controller {
   confirmDialog = (msg, options) => {
     let error = 'Confirm dialog function was not properly passed via parameters. Check the console to see more info.'
     console.error(error, msg, options)
-    // as the confirm dialog function was not defined, the action has been cancelled
+    // As the confirm dialog function was not defined, the action has been cancelled
     return new Promise((resolve, reject) => {
       reject(error)
     })
@@ -218,7 +218,7 @@ class Controller {
         },
         errorResponse => {
           // Handle the error response
-          context.handleError(errorResponse, context.options.indexFailedMsg, context.vm.$t('crud.failWhileTryingToGetTheResource'))
+          context.handleError(errorResponse, context.options.indexFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToGetTheResource'))
 
           // if it is being run because of a queryOnStartup flag, so we need to tell
           // the client that the crud request is done
@@ -259,7 +259,7 @@ class Controller {
         },
         errorResponse => {
           // Handle the error response
-          context.handleError(errorResponse, context.options.getFailedMsg, context.vm.$t('crud.failWhileTryingToGetTheResource'))
+          context.handleError(errorResponse, context.options.getFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToGetTheResource'))
 
           // In the default CRUD usage, it is not necessary to
           // listen to the promise result
@@ -291,7 +291,7 @@ class Controller {
       if (validForm && proceed) {
         let postResource = context.vm.resource.$strip(context.vm.resource)
         if (Object.keys(postResource).length === 0) {
-          let msg = context.options.resourceEmptyMsg || context.vm.$t('crud.resourceEmptyMsg').replace(':resource', context.vm.resource.$getName())
+          let msg = context.options.resourceEmptyMsg || context.vm.crudTranslate('crud.resourceEmptyMsg').replace(':resource', context.vm.resource.$getName())
           context.vm.showError(context.capitalize(msg), {mode: 'multi-line'})
           reject(msg)
         } else {
@@ -300,7 +300,7 @@ class Controller {
             context.vm.resource = data.resource
 
             // Define the save confirmation message to be displayed
-            let msg = data.message || context.options.savedMsg || context.vm.$t('crud.resourceSaved').replace(':resource', context.vm.resource.$getName())
+            let msg = data.message || context.options.savedMsg || context.vm.crudTranslate('crud.resourceSaved').replace(':resource', context.vm.resource.$getName())
 
             // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
             context.vm.showSuccess(context.capitalize(msg), {mode: 'multi-line'})
@@ -322,7 +322,7 @@ class Controller {
           },
           errorResponse => {
             // Handle the error response
-            context.handleError(errorResponse, context.options.saveFailedMsg, context.vm.$t('crud.failWhileTryingToSaveResource'))
+            context.handleError(errorResponse, context.options.saveFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToSaveResource'))
 
             // In the default CRUD usage, it is not necessary to
             // listen to the promise result
@@ -355,7 +355,7 @@ class Controller {
           context.vm.resource = data.resource
 
           // Define the save confirmation message to be displayed
-          let msg = data.message || context.options.updatedMsg || context.vm.$t('crud.resourceUpdated').replace(':resource', context.vm.resource.$getName())
+          let msg = data.message || context.options.updatedMsg || context.vm.crudTranslate('crud.resourceUpdated').replace(':resource', context.vm.resource.$getName())
 
           // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
           context.vm.showSuccess(context.capitalize(msg), {mode: 'multi-line'})
@@ -377,7 +377,7 @@ class Controller {
         },
         errorResponse => {
           // Handle the error response
-          context.handleError(errorResponse, context.options.updateFailedMsg, context.vm.$t('crud.failWhileTryingToUpdateResource'))
+          context.handleError(errorResponse, context.options.updateFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToUpdateResource'))
 
           // In the default CRUD usage, it is not necessary to
           // listen to the promise result
@@ -400,10 +400,10 @@ class Controller {
     let context = this
     return new Promise((resolve, reject) => {
       // Define the conformation modal title to be displayed before destroying
-      let confirmTitle = context.options.confirmDestroyTitle || context.vm.$t('crud.removalConfirmTitle')
+      let confirmTitle = context.options.confirmDestroyTitle || context.vm.crudTranslate('crud.removalConfirmTitle')
 
       // Define the conformation modal text to be displayed before destroying
-      let confirmMessage = context.options.confirmDestroyText || context.vm.$t('crud.doYouReallyWantToRemove').replace(':resource', context.vm.resource.$getName())
+      let confirmMessage = context.options.confirmDestroyText || context.vm.crudTranslate('crud.doYouReallyWantToRemove').replace(':resource', context.vm.resource.$getName())
 
       // Open the confirmation modal and wait for the response in a promise
       context.vm.confirmDialog(confirmTitle, confirmMessage).then(() => {
@@ -419,7 +419,7 @@ class Controller {
         )
       }, (error) => { // If the user has clicked `no` in the dialog, abort the destroy and show an aborted message
         // Define the error message to be displayed
-        let msg = context.options.destroyAbortedMsg || context.vm.$t('crud.destroyAborted')
+        let msg = context.options.destroyAbortedMsg || context.vm.crudTranslate('crud.destroyAborted')
 
         // show the abort message as an info
         context.vm.showInfo(msg)
@@ -448,7 +448,7 @@ class Controller {
       if (proceed) {
         resource.$destroy().then((data) => {
           // Define the save confirmation message to be displayed
-          let msg = data.message || context.options.destroyedMsg || context.vm.$t('crud.resourceDestroyed').replace(':resource', context.vm.resource.$getName())
+          let msg = data.message || context.options.destroyedMsg || context.vm.crudTranslate('crud.resourceDestroyed').replace(':resource', context.vm.resource.$getName())
 
           // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
           context.vm.showSuccess(context.capitalize(msg), {mode: 'multi-line'})
@@ -470,7 +470,7 @@ class Controller {
         },
         errorResponse => {
           // Handle the error response
-          context.handleError(errorResponse, context.options.destroyFailedMsg, context.vm.$t('crud.failWhileTryingToDestroyResource'))
+          context.handleError(errorResponse, context.options.destroyFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToDestroyResource'))
 
           // In the default CRUD usage, it is not necessary to
           // listen to the promise result
@@ -546,7 +546,7 @@ class Controller {
     if (proceed === false) {
       let error = `proceed stopped on ${callbackFunc} function`
       console.log(error)
-      let errorMsg = this.options.operationAborted || this.vm.$t('crud.operationAborted')
+      let errorMsg = this.options.operationAborted || this.vm.crudTranslate('crud.operationAborted')
       this.vm.showInfo(this.capitalize(errorMsg), {mode: 'multi-line'})
 
       // In the default CRUD usage, it is not necessary to
@@ -587,7 +587,7 @@ class Controller {
     let formHelper = new FormHelper(form, this.vm, this.options)
     validForm = formHelper.validate()
     if (!validForm) {
-      let errorMsg = this.options.invalidForm || this.vm.$t('crud.invalidForm')
+      let errorMsg = this.options.invalidForm || this.vm.crudTranslate('crud.invalidForm')
       // In the default CRUD usage, it is not necessary to
       // listen to the promise result
       // if the promise is not being listened

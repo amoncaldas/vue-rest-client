@@ -2146,7 +2146,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var CrudHttp =
 /**
  * Build and cofigure the http client instance
- * @param {Object} vueInstance
  * @param {Object} options - object containing:
  * {
  *  baseURL: String
@@ -2288,7 +2287,7 @@ function CrudHttp() {
   this.setDefaultOptions(); // Build an axios object
 
   var httpApi = _axios["default"].create({
-    baseURL: options.baseURL,
+    baseURL: this.options.baseURL,
     headers: {}
   });
 

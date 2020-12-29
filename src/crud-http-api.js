@@ -3,7 +3,6 @@ import axios from 'axios'
 class CrudHttp {
   /**
    * Build and cofigure the http client instance
-   * @param {Object} vueInstance
    * @param {Object} options - object containing:
    * {
    *  baseURL: String
@@ -21,7 +20,7 @@ class CrudHttp {
 
     // Build an axios object
     const httpApi = axios.create({
-      baseURL: options.baseURL,
+      baseURL: this.options.baseURL,
       headers: {}
     })
     httpApi.interceptors.request.use(this.requestInterceptors)

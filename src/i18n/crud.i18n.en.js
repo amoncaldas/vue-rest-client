@@ -1,19 +1,19 @@
 export default {
   crud: {
-    failWhileTryingToGetTheResource: 'It was not possible to get the :resource(s)',
-    failWhileTryingToSaveResource: 'It was not possible to save the :resource',
-    failWhileTryingToUpdateResource: 'It was not possible to update the :resource',
-    failWhileTryingToDestroyResource: 'It was not possible to remove the :resource',
-    resourceSaved: ':resource saved successfully',
-    resourceDestroyed: ':resource removed successfully',
-    resourceUpdated: ':resource updated successfully',
+    failWhileTryingToGetTheResourceMsg: 'It was not possible to get the :resource(s)',
+    failWhileTryingToSaveResourceMsg: 'It was not possible to save the :resource',
+    failWhileTryingToUpdateResourceMsg: 'It was not possible to update the :resource',
+    failWhileTryingToDestroyResourceMsg: 'It was not possible to remove the :resource',
+    resourceSavedMsg: ':resource saved successfully',
+    resourceDestroyedMsg: ':resource removed successfully',
+    resourceUpdatedMsg: ':resource updated successfully',
     removalConfirmTitle: 'Confirm removal',
-    doYouReallyWantToRemove: 'Do you really want to remove this :resource?',
-    destroyAborted: 'Removal aborted',
+    doYouReallyWantToRemoveMsg: 'Do you really want to remove this :resource?',
+    destroyAbortedMsg: 'Removal aborted',
     resourceEmptyMsg: 'The :resource is empty. It is not possible to save it',
-    invalidForm: 'Some form fields are invalid. Please check it out',
-    operationAborted: 'Operation aborted',
-    inputRequired: 'Input required',
-    required: 'required'
+    invalidFormMsg: 'Some form fields are invalid. Please check it out',
+    operationAbortedMsg: 'Operation aborted',
+    inputRequiredMsg: 'Input required',
+    requiredMsg: 'required'
   }
 }

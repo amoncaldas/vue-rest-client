@@ -55,7 +55,6 @@ var Controller = /*#__PURE__*/function () {
       this.vm.update = this.update;
       this.vm.destroy = this.destroy;
       this.vm.confirmAndDestroy = this.confirmAndDestroy;
-      this.vm.crudTranslate = this.options.translate || this.vm.$t || this.translate;
       this.vm.showSuccess = this.options.showSuccess || this.vm.showSuccess || this.showSuccess;
       this.vm.showInfo = this.options.showInfo || this.vm.showInfo || this.showSuccess;
       this.vm.showError = this.options.showError || this.vm.showError || this.showSuccess;
@@ -70,9 +69,39 @@ var Controller = /*#__PURE__*/function () {
       }
     }
     /**
-     * Alternative function to show CRUD error
+     * TRansalte text to be displayed
      * @param {String} key
      * @return {String} msg
+     */
+
+  }, {
+    key: "tanslateText",
+    value: function tanslateText(key) {
+      var transaltion;
+
+      if (this.options[key]) {
+        transaltion = this.options[key];
+      }
+
+      if (!transaltion && this.vm.$t) {
+        var trans = this.vm.$t("crud.".concat(key));
+
+        if (trans !== key) {
+          transaltion = trans;
+        }
+      }
+
+      if (!transaltion) {
+        console.error("The translation for a string ".concat(key, " passed via options, nor is present in 'crud.").concat(key, "' to be used via vue-i18n, so a fallback english string was used."));
+        transaltion = _crudI18n["default"].crud[key] || key;
+      }
+
+      return transaltion;
+    }
+    /**
+     * Alternative function to show CRUD success
+     * @param {String} msg
+     * @param {*} options
      */
 
   }, {
@@ -148,7 +177,7 @@ var Controller = /*#__PURE__*/function () {
       if (proceed === false) {
         var error = "proceed stopped on ".concat(callbackFunc, " function");
         console.log(error);
-        var errorMsg = this.options.operationAborted || this.vm.crudTranslate('crud.operationAborted');
+        var errorMsg = this.tanslateText('operationAbortedMsg');
         this.vm.showInfo(this.capitalize(errorMsg), {
           mode: 'multi-line'
         }); // In the default CRUD usage, it is not necessary to
@@ -197,7 +226,7 @@ var Controller = /*#__PURE__*/function () {
       validForm = formHelper.validate();
 
       if (!validForm) {
-        var errorMsg = this.options.invalidForm || this.vm.crudTranslate('crud.invalidForm'); // In the default CRUD usage, it is not necessary to
+        var errorMsg = this.tanslateText('invalidFormMsg'); // In the default CRUD usage, it is not necessary to
         // listen to the promise result
         // if the promise is not being listened
         // it can raise an error when rejected/resolved.
@@ -283,12 +312,6 @@ var Controller = /*#__PURE__*/function () {
 var _initialiseProps = function _initialiseProps() {
   var _this2 = this;
 
-  this.trasnslate = function (key) {
-    var error = 'The translate function was not properly passed via options, so a fallback function was used and english as used as default translation.';
-    console.error(error);
-    return _crudI18n["default"].crud[key] || key;
-  };
-
   this.showSuccess = function (msg, options) {
     console.log(msg, options);
   };
@@ -337,7 +360,7 @@ var _initialiseProps = function _initialiseProps() {
           resolve(resources);
         }, function (errorResponse) {
           // Handle the error response
-          context.handleError(errorResponse, context.options.indexFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToGetTheResource')); // if it is being run because of a queryOnStartup flag, so we need to tell
+          context.handleError(errorResponse, context.tanslateText('failWhileTryingToGetTheResourceMsg')); // if it is being run because of a queryOnStartup flag, so we need to tell
           // the client that the crud request is done
 
           if (context.options.queryOnStartup) {
@@ -367,7 +390,7 @@ var _initialiseProps = function _initialiseProps() {
           resolve(context.vm.resource);
         }, function (errorResponse) {
           // Handle the error response
-          context.handleError(errorResponse, context.options.getFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToGetTheResource')); // In the default CRUD usage, it is not necessary to
+          context.handleError(errorResponse, context.tanslateText('failWhileTryingToGetTheResourceMsg')); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.
@@ -391,7 +414,7 @@ var _initialiseProps = function _initialiseProps() {
         var postResource = context.vm.resource.$strip(context.vm.resource);
 
         if (Object.keys(postResource).length === 0) {
-          var msg = context.options.resourceEmptyMsg || context.vm.crudTranslate('crud.resourceEmptyMsg').replace(':resource', context.vm.resource.$getName());
+          var msg = context.tanslateText('resourceEmptyMsg').replace(':resource', context.vm.resource.$getName());
           context.vm.showError(context.capitalize(msg), {
             mode: 'multi-line'
           });
@@ -401,7 +424,7 @@ var _initialiseProps = function _initialiseProps() {
             // the return is an object containing a resource/Model instance and a (optional) message property
             context.vm.resource = data.resource; // Define the save confirmation message to be displayed
 
-            var msg = data.message || context.options.savedMsg || context.vm.crudTranslate('crud.resourceSaved').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
+            var msg = data.message || context.tanslateText('resourceSavedMsg').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
 
             context.vm.showSuccess(context.capitalize(msg), {
               mode: 'multi-line'
@@ -421,7 +444,7 @@ var _initialiseProps = function _initialiseProps() {
             resolve(context.vm.resource);
           }, function (errorResponse) {
             // Handle the error response
-            context.handleError(errorResponse, context.options.saveFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToSaveResource')); // In the default CRUD usage, it is not necessary to
+            context.handleError(errorResponse, context.tanslateText('failWhileTryingToSaveResourceMsg')); // In the default CRUD usage, it is not necessary to
             // listen to the promise result
             // if the promise is not being listened
             // it can raise an error when rejected/resolved.
@@ -445,7 +468,7 @@ var _initialiseProps = function _initialiseProps() {
           // the return is an object containing a resource/Model instance and a (optional) message property
           context.vm.resource = data.resource; // Define the save confirmation message to be displayed
 
-          var msg = data.message || context.options.updatedMsg || context.vm.crudTranslate('crud.resourceUpdated').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
+          var msg = data.message || context.tanslateText('resourceUpdatedMsg').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
 
           context.vm.showSuccess(context.capitalize(msg), {
             mode: 'multi-line'
@@ -465,7 +488,7 @@ var _initialiseProps = function _initialiseProps() {
           resolve(context.vm.resource);
         }, function (errorResponse) {
           // Handle the error response
-          context.handleError(errorResponse, context.options.updateFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToUpdateResource')); // In the default CRUD usage, it is not necessary to
+          context.handleError(errorResponse, context.tanslateText('failWhileTryingToUpdateResourceMsg')); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.
@@ -481,9 +504,9 @@ var _initialiseProps = function _initialiseProps() {
     var context = _this2;
     return new Promise(function (resolve, reject) {
       // Define the conformation modal title to be displayed before destroying
-      var confirmTitle = context.options.confirmDestroyTitle || context.vm.crudTranslate('crud.removalConfirmTitle'); // Define the conformation modal text to be displayed before destroying
+      var confirmTitle = context.tanslateText('removalConfirmTitle'); // Define the conformation modal text to be displayed before destroying
 
-      var confirmMessage = context.options.confirmDestroyText || context.vm.crudTranslate('crud.doYouReallyWantToRemove').replace(':resource', context.vm.resource.$getName()); // Open the confirmation modal and wait for the response in a promise
+      var confirmMessage = context.tanslateText('doYouReallyWantToRemoveMsg').replace(':resource', context.vm.resource.$getName()); // Open the confirmation modal and wait for the response in a promise
 
       context.vm.confirmDialog(confirmTitle, confirmMessage).then(function () {
         // if the user confirms the destroy, run it
@@ -496,7 +519,7 @@ var _initialiseProps = function _initialiseProps() {
       }, function (error) {
         // If the user has clicked `no` in the dialog, abort the destroy and show an aborted message
         // Define the error message to be displayed
-        var msg = context.options.destroyAbortedMsg || context.vm.crudTranslate('crud.destroyAborted'); // show the abort message as an info
+        var msg = context.tanslateText('destroyAbortedMsg'); // show the abort message as an info
 
         context.vm.showInfo(msg); // In the default CRUD usage, it is not necessary to
         // listen to the promise result
@@ -517,7 +540,7 @@ var _initialiseProps = function _initialiseProps() {
       if (proceed) {
         resource.$destroy().then(function (data) {
           // Define the save confirmation message to be displayed
-          var msg = data.message || context.options.destroyedMsg || context.vm.crudTranslate('crud.resourceDestroyed').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
+          var msg = data.message || context.tanslateText('resourceDestroyed').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
 
           context.vm.showSuccess(context.capitalize(msg), {
             mode: 'multi-line'
@@ -537,7 +560,7 @@ var _initialiseProps = function _initialiseProps() {
           resolve();
         }, function (errorResponse) {
           // Handle the error response
-          context.handleError(errorResponse, context.options.destroyFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToDestroyResource')); // In the default CRUD usage, it is not necessary to
+          context.handleError(errorResponse, context.tanslateText('failWhileTryingToDestroyResourceMsg')); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.

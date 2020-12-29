@@ -38,7 +38,7 @@ var CrudForm = function () {
       }
 
       if (!validForm && !this.options.skipShowValidationMsg) {
-        var errorMsg = this.options.invalidForm || this.vm.$t('crud.invalidForm');
+        var errorMsg = this.options.invalidFormMsg || this.vm.$t('crud.invalidForm');
         // as we are not sure about the error message size, use multi-line model for the toaster
         this.vm.showError(this.capitalize(errorMsg), { mode: 'multi-line' });
       }

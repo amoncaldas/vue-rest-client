@@ -5,79 +5,11 @@
  * This crud class implements the full cycle to get and send data to/from a remote server, including before destroy confirmation dialog,
  * refresh listed data after save, destroy and update and success and confirmation messages.
  *
- * EXPORTS: this javascript module exports two objects: CRUDData and CRUD.
- * The first one must be injected in the vue data section, using the three dots notation, like this:
- *
- *  data: () => ({
- *    ...CRUDData // create the crud data objects (resource, resources and modelService)
- *  })
- *
- * The second one must be used to instantiate the crud class on the vue created event, like this:
- *
- *  created () {
- *    // extend this component, adding CRUD functionalities
- *    let options = {...}
- *    CRUD.set(this, myModelService, options)
- *  }
- *
- * @see @/core/model-service to understand how to create a myModelService to represent a resource/model
- *
- * TOASTS shown after each action use the following priority: server response message,
- * custom message specified in options or the default one (defined @crud/i18n/crud.i18n.en.js)
- *
  * @author <amoncaldas@gmail.com> Amon santana
  *
  * @param {*} vm the component content, that can be passed using ´this´
  * @param {*} modelService an instance of the ModelService class representing the service that provides the data service to a resource. @see @/core/model-service
  * @param {*} options object with optional parameters that allows to customize the CRUD behavior
- *
- * The options object may contain the following attributes:
- *  - queryOnStartup (boolean): if the index action must be ran on the first CRUD run
- *  - indexFailedMsg (string): custom message to be displayed on index action failure
- *  - getFailedMsg (string): custom message to be displayed on get single item action failure
- *  - saveFailedMsg (string): custom message to be displayed on save action failure
- *  - updatedMsg (string): custom message to be displayed on update action failure
- *  - confirmDestroyTitle (string): custom title to be displayed on the confirm dialog shown before destroy action
- *  - confirmDestroyText (string): custom text to be displayed on the confirm dialog shown before destroy action
- *  - destroyedMsg (string): custom message to be displayed after an resource has been destroyed
- *  - destroyFailedMsg (string): custom message to be displayed on destroy action failure
- *  - destroyAbortedMsg (string): custom message to be displayed when a destroy is aborted
- *
- *  - skipFormValidation (boolean): skips the auto form validation
- *  - skipAutoIndexAfterAllEvents (boolean) : skips the auto resources reload after data change events (update, destroy and save)
- *  - skipAutoIndexAfterSave (boolean) : skips the auto resources reload after save
- *  - skipAutoIndexAfterUpdate (boolean) : skips the auto resources reload after update
- *  - skipAutoIndexAfterDestroy (boolean) : skips the auto resources reload after destroy
- *  - skipServerMessages (boolean) : skip using server returned message and use only front end messages do display toasters
- *  - skipShowValidationMsg (boolean) : skit showing the validation error message via toaster when a form is invalid
- *  - formRef (string, optional) : the alternative name of the form ref you are using in the template. Used to auto validate the form. If not provided, it is assumed that the form ref name is `form`
- *  - translate (function): a function that will translate a message according the active locale.
- *  - showSuccess: function to be called to show action success message
- *  - showInfo: function to be called to show action info message
- *  - showError: function to be called to show action error
- *  - confirmDialog: function to be called when a confirm resource removal action is run. Expected to return a promise
- *  - [http-error-status-code-number] : defines the message to be used when an http error status code is returned by a request (only available fot status code from `300` to `505`)
- *
- * Crud events optional functions:
- * if the vue instance has one of the following defined methods, it is gonna be ran. If it returns false, the execution will be rejected and stopped
- *  - beforeIndex
- *  - beforeGet
- *  - beforeSave
- *  - beforeUpdate
- *  - beforeDestroy
- *  - beforeShowError
- *
- * If the vue `component` to which you are adding the CRUD has one of the following defined methods, it is gonna be called by the CRUD passing the related data
-
- * - afterIndex
- * - afterGet
- * - afterSave
- * - afterUpdate
- * - afterDestroy
- * - afterError
- *
- * Form validation:
- * if the current vue instance has a $ref named `form` and does not have the option `skipFormValidation` defined as true, the auto form validation will be ran before save and update
  */
 
 import FormHelper from './form-helper'
@@ -117,7 +49,6 @@ class Controller {
     this.vm.update = this.update
     this.vm.destroy = this.destroy
     this.vm.confirmAndDestroy = this.confirmAndDestroy
-    this.vm.crudTranslate = this.options.translate || this.vm.$t || this.translate
     this.vm.showSuccess = this.options.showSuccess || this.vm.showSuccess || this.showSuccess
     this.vm.showInfo = this.options.showInfo || this.vm.showInfo || this.showSuccess
     this.vm.showError = this.options.showError || this.vm.showError || this.showSuccess
@@ -134,14 +65,27 @@ class Controller {
   }
 
   /**
-   * Alternative function to show CRUD error
+   * TRansalte text to be displayed
    * @param {String} key
    * @return {String} msg
    */
-  trasnslate = (key) => {
-    let error = 'The translate function was not properly passed via options, so a fallback function was used and english as used as default translation.'
-    console.error(error)
-    return crudI18nEN.crud[key] || key
+  tanslateText (key) {
+    let transaltion
+    if (this.options[key]) {
+      transaltion = this.options[key]
+    }
+    
+    if (!transaltion && this.vm.$t) {
+      let trans = this.vm.$t(`crud.${key}`)
+      if (trans !== key) {
+        transaltion = trans
+      }
+    }
+    if (!transaltion) {
+      console.error(`The translation for a string ${key} passed via options, nor is present in 'crud.${key}' to be used via vue-i18n, so a fallback english string was used.`)
+      transaltion = crudI18nEN.crud[key] || key
+    }
+    return transaltion
   }
 
   /**
@@ -218,7 +162,7 @@ class Controller {
         },
         errorResponse => {
           // Handle the error response
-          context.handleError(errorResponse, context.options.indexFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToGetTheResource'))
+          context.handleError(errorResponse, context.tanslateText('failWhileTryingToGetTheResourceMsg'))
 
           // if it is being run because of a queryOnStartup flag, so we need to tell
           // the client that the crud request is done
@@ -259,7 +203,7 @@ class Controller {
         },
         errorResponse => {
           // Handle the error response
-          context.handleError(errorResponse, context.options.getFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToGetTheResource'))
+          context.handleError(errorResponse, context.tanslateText('failWhileTryingToGetTheResourceMsg'))
 
           // In the default CRUD usage, it is not necessary to
           // listen to the promise result
@@ -291,7 +235,7 @@ class Controller {
       if (validForm && proceed) {
         let postResource = context.vm.resource.$strip(context.vm.resource)
         if (Object.keys(postResource).length === 0) {
-          let msg = context.options.resourceEmptyMsg || context.vm.crudTranslate('crud.resourceEmptyMsg').replace(':resource', context.vm.resource.$getName())
+          let msg = context.tanslateText('resourceEmptyMsg').replace(':resource', context.vm.resource.$getName())
           context.vm.showError(context.capitalize(msg), {mode: 'multi-line'})
           reject(msg)
         } else {
@@ -300,7 +244,7 @@ class Controller {
             context.vm.resource = data.resource
 
             // Define the save confirmation message to be displayed
-            let msg = data.message || context.options.savedMsg || context.vm.crudTranslate('crud.resourceSaved').replace(':resource', context.vm.resource.$getName())
+            let msg = data.message || context.tanslateText('resourceSavedMsg').replace(':resource', context.vm.resource.$getName())
 
             // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
             context.vm.showSuccess(context.capitalize(msg), {mode: 'multi-line'})
@@ -322,7 +266,7 @@ class Controller {
           },
           errorResponse => {
             // Handle the error response
-            context.handleError(errorResponse, context.options.saveFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToSaveResource'))
+            context.handleError(errorResponse, context.tanslateText('failWhileTryingToSaveResourceMsg'))
 
             // In the default CRUD usage, it is not necessary to
             // listen to the promise result
@@ -355,7 +299,7 @@ class Controller {
           context.vm.resource = data.resource
 
           // Define the save confirmation message to be displayed
-          let msg = data.message || context.options.updatedMsg || context.vm.crudTranslate('crud.resourceUpdated').replace(':resource', context.vm.resource.$getName())
+          let msg = data.message || context.tanslateText('resourceUpdatedMsg').replace(':resource', context.vm.resource.$getName())
 
           // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
           context.vm.showSuccess(context.capitalize(msg), {mode: 'multi-line'})
@@ -377,7 +321,7 @@ class Controller {
         },
         errorResponse => {
           // Handle the error response
-          context.handleError(errorResponse, context.options.updateFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToUpdateResource'))
+          context.handleError(errorResponse, context.tanslateText('failWhileTryingToUpdateResourceMsg'))
 
           // In the default CRUD usage, it is not necessary to
           // listen to the promise result
@@ -400,10 +344,10 @@ class Controller {
     let context = this
     return new Promise((resolve, reject) => {
       // Define the conformation modal title to be displayed before destroying
-      let confirmTitle = context.options.confirmDestroyTitle || context.vm.crudTranslate('crud.removalConfirmTitle')
+      let confirmTitle = context.tanslateText('removalConfirmTitle')
 
       // Define the conformation modal text to be displayed before destroying
-      let confirmMessage = context.options.confirmDestroyText || context.vm.crudTranslate('crud.doYouReallyWantToRemove').replace(':resource', context.vm.resource.$getName())
+      let confirmMessage = context.tanslateText('doYouReallyWantToRemoveMsg').replace(':resource', context.vm.resource.$getName())
 
       // Open the confirmation modal and wait for the response in a promise
       context.vm.confirmDialog(confirmTitle, confirmMessage).then(() => {
@@ -419,7 +363,7 @@ class Controller {
         )
       }, (error) => { // If the user has clicked `no` in the dialog, abort the destroy and show an aborted message
         // Define the error message to be displayed
-        let msg = context.options.destroyAbortedMsg || context.vm.crudTranslate('crud.destroyAborted')
+        let msg = context.tanslateText('destroyAbortedMsg')
 
         // show the abort message as an info
         context.vm.showInfo(msg)
@@ -448,7 +392,7 @@ class Controller {
       if (proceed) {
         resource.$destroy().then((data) => {
           // Define the save confirmation message to be displayed
-          let msg = data.message || context.options.destroyedMsg || context.vm.crudTranslate('crud.resourceDestroyed').replace(':resource', context.vm.resource.$getName())
+          let msg = data.message || context.tanslateText('resourceDestroyed').replace(':resource', context.vm.resource.$getName())
 
           // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
           context.vm.showSuccess(context.capitalize(msg), {mode: 'multi-line'})
@@ -470,7 +414,7 @@ class Controller {
         },
         errorResponse => {
           // Handle the error response
-          context.handleError(errorResponse, context.options.destroyFailedMsg, context.vm.crudTranslate('crud.failWhileTryingToDestroyResource'))
+          context.handleError(errorResponse, context.tanslateText('failWhileTryingToDestroyResourceMsg'))
 
           // In the default CRUD usage, it is not necessary to
           // listen to the promise result
@@ -546,7 +490,7 @@ class Controller {
     if (proceed === false) {
       let error = `proceed stopped on ${callbackFunc} function`
       console.log(error)
-      let errorMsg = this.options.operationAborted || this.vm.crudTranslate('crud.operationAborted')
+      let errorMsg = this.tanslateText('operationAbortedMsg')
       this.vm.showInfo(this.capitalize(errorMsg), {mode: 'multi-line'})
 
       // In the default CRUD usage, it is not necessary to
@@ -587,7 +531,7 @@ class Controller {
     let formHelper = new FormHelper(form, this.vm, this.options)
     validForm = formHelper.validate()
     if (!validForm) {
-      let errorMsg = this.options.invalidForm || this.vm.crudTranslate('crud.invalidForm')
+      let errorMsg = this.tanslateText('invalidFormMsg')
       // In the default CRUD usage, it is not necessary to
       // listen to the promise result
       // if the promise is not being listened

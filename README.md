@@ -135,18 +135,30 @@ The crud setter expects the following parameters:
 1. @param {} `modelService`  - an instance of the ModelService class representing the service that provides the data service to a resource. @see @/core/model-service
 1. @param {} `options` - object with optional parameters that allows to customize the CRUD behavior
 
-The options object may contain the following attributes:
+The options object may contain the following properties:
 
-- `queryOnStartup` (boolean): if the index action must be ran on the first CRUD run
-- `indexFailedMsg` (string): custom message to be displayed on index action failure
-- `getFailedMsg` (string): custom message to be displayed on get single item action failure
+**Messages and texts**
+
+- `resourceSavedMsg` (string): custom message for resource saved
+- `resourceEmptyMsg` (string) custom message for resource empty
+- `resourceUpdatedMsg` (string) custom message for resource updated
+- `operationAbortedMsg` (string): custom message for operation aborted.
+- `failWhileTryingToGetTheResourceMsg` (string): custom message for fail while trying to get resource
 - `saveFailedMsg` (string): custom message to be displayed on save action failure
 - `updatedMsg` (string): custom message to be displayed on update action failure
 - `confirmDestroyTitle` (string): custom title to be displayed on the confirm dialog shown before destroy action
-- `confirmDestroyText` (string): custom text to be displayed on the confirm dialog shown before destroy action
+- `doYouReallyWantToRemoveMsg` (string): custom text to be displayed on the confirm dialog shown before destroy action
 - `destroyedMsg` (string): custom message to be displayed after an resource has been destroyed
-- `destroyFailedMsg` (string): custom message to be displayed on destroy action failure
+- `failWhileTryingToDestroyResourceMsg` (string): custom message to be displayed on destroy action failure
+- `failWhileTryingToUpdateResourceMsg` (string): custom message for update failure
 - `destroyAbortedMsg` (string): custom message to be displayed when a destroy is aborted
+- `resourceDestroyedMsg` (string): custom message for resource destroyed
+- `invalidFormMsg` (string): custom invalid form message
+- `removalConfirmTitle`: (string): custom message for removal conform title
+
+**Other options**
+
+- `queryOnStartup` (boolean): if the index action must be ran on the first CRUD run
 - `skipFormValidation` (boolean): skips the auto form validation
 - `skipFormValidation` (boolean): skips the auto form validation
 - `skipAutoIndexAfterAllEvents` (boolean) : skips the auto resources reload after data change events (update, destroy and save)
@@ -156,34 +168,33 @@ The options object may contain the following attributes:
 - `skipServerMessages` (boolean) : skip using server returned message and use only front end messages do display toasters
 - `skipShowValidationMsg` (boolean) : skit showing the validation error message via toaster when a form is invalid
 - `formRef` (string, optional) : the alternative name of the form ref you are using in the template. Used to auto validate the form. If not provided, it is assumed that the form ref name is `form`
-- `translate` (function): a function that will translate a message according the active locale.
 - `showSuccess`: function to be called to show action success message
 - `showInfo`: function to be called to show action info message
 - `showError`: function to be called to show action error
 - `confirmDialog`: function to be called when a confirm resource removal action is run. Expected to return a promise
 - `[http-error-status-code-number]` : defines the message to be used when an http error status code is returned by a request (only available fot status code from `300` to `505`)
 
-If your component/vue instance has the functions `showSuccess`, `showInfo`, `showError` and `confirmDialog`, they will be called if these functions are not passed via options and when the corresponding event occurs. the same way, if your component/vue instance has the `$t` function (created by `vue-i18n` component) it will be used to translate the CRUD messages. If you are not using it, just pass the `translate` function via options when using crud. 
+If your component/vue instance has the functions `showSuccess`, `showInfo`, `showError` and `confirmDialog`, they will be called if these functions are not passed via options and when the corresponding event occurs. the same way, if your component/vue instance has the `$t` function (created by `vue-i18n` component) it will be used to translate the CRUD messages by trying to get it, for example, via `crud.resourceSavedMsg`. If you are not using it, just pass the translations via options.
 
 Example of adding CRUD to a component:
 
 ```js
-import {CRUD, CRUDData} from '@/core/crud'
-import myModelService from './my-model-service'
+import VueRestCrud from 'vue-rest-crud'
+import myModelService from 'path/to/my/model-service'
 
 // Then, inside your default export
 
 export default {
   data: () => ({
     // create the crud data objects (resource, resources and modelService) using three dots notation
-    ...CRUDData
+    ...VueRestCrud.Data
   })
 
   // The second one must be used to instantiate the crud class on the vue created event, like this:
   created () {
     // extend this component, adding CRUD functionalities
     let options = {...}
-    CRUD.set(this, myModelService, options)
+    VueRestCrud.Controller..set(this, myModelService, options)
   }
 }
 ```

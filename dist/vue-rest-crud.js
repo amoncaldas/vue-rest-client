@@ -2147,7 +2147,7 @@ var CrudHttp =
 /**
  * Build and cofigure the http client instance
  * @param {Object} vueInstance
- * @param {Object} optionsFunctions - object containing:
+ * @param {Object} options - object containing:
  * {
  *  baseURL: String
  *  isAuthenticated: Function,

@@ -93,7 +93,7 @@ var Controller = /*#__PURE__*/function () {
       }
 
       if (!transaltion) {
-        console.error("The translation for a string ".concat(key, " passed via options, nor is present in 'crud.").concat(key, "' to be used via vue-i18n, so a fallback english string was used."));
+        console.error("The translation for the string ".concat(key, " was not passed via options, nor is present in 'crud.").concat(key, "' to be used via $t 'vue-i18n', so a fallback English string was used."));
         transaltion = _crudI18n["default"].crud[key] || key;
       }
 
@@ -210,7 +210,7 @@ var Controller = /*#__PURE__*/function () {
      * Checks whenever the default form $rf exists and if so, if it is valid
      * If invalid, reject the promise and show the invalid form error message
      *
-     * @param {*} reject
+     * @param {Function} reject
      * @returns boolean
      */
 

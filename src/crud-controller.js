@@ -78,13 +78,13 @@ class Controller {
     if (!transaltion && this.vm.$t) {
       let translationPath = `crud.${key}`
       let trans = this.vm.$t(translationPath)
-      
+
       if (trans !== translationPath) {
         transaltion = trans
       }
     }
     if (!transaltion) {
-      console.error(`The translation for a string ${key} passed via options, nor is present in 'crud.${key}' to be used via vue-i18n, so a fallback english string was used.`)
+      console.error(`The translation for the string ${key} was not passed via options, nor is present in 'crud.${key}' to be used via $t 'vue-i18n', so a fallback English string was used.`)
       transaltion = crudI18nEN.crud[key] || key
     }
     return transaltion
@@ -522,7 +522,7 @@ class Controller {
    * Checks whenever the default form $rf exists and if so, if it is valid
    * If invalid, reject the promise and show the invalid form error message
    *
-   * @param {*} reject
+   * @param {Function} reject
    * @returns boolean
    */
   formIsValid (reject) {

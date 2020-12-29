@@ -22,11 +22,37 @@ class CrudForm {
     }
 
     if (!validForm && !this.options.skipShowValidationMsg) {
-      let errorMsg = this.options.invalidFormMsg || this.vm.$t('crud.invalidForm')
+      let errorMsg = this.tanslateText('invalidFormMsg')
       // as we are not sure about the error message size, use multi-line model for the toaster
       this.vm.showError(this.capitalize(errorMsg), {mode: 'multi-line'})
     }
     return validForm
+  }
+
+  /**
+   * TRansalte text to be displayed
+   * @param {String} key
+   * @return {String} msg
+   */
+  tanslateText (key) {
+    let transaltion
+    if (this.options[key]) {
+      transaltion = this.options[key]
+    }
+    
+    if (!transaltion && this.vm.$t) {
+      let translationPath = `crud.${key}`
+      let trans = this.vm.$t(translationPath)
+
+      if (trans !== translationPath) {
+        transaltion = trans
+      }
+    }
+    if (!transaltion) {
+      console.error(`The translation for the string ${key} was not passed via options, nor is present in 'crud.${key}' to be used via $t 'vue-i18n', so a fallback English string was used.`)
+      transaltion = crudI18nEN.crud[key] || key
+    }
+    return transaltion
   }
 
   /**
@@ -42,7 +68,7 @@ class CrudForm {
       // We only validate the  required attribute if the input is not yet invalid
       if (input.valid && input.required && (input.inputValue === undefined || input.inputValue === null || input.inputValue === '')) {
         input.valid = validForm = false
-        let errorMsg = `${input.label} ${this.vm.$t('crud.required')}` || this.vm.$t('crud.inputRequired')
+        let errorMsg = `${input.label} ${this.tanslateText('requiredMsg')}` || this.tanslateText('inputRequiredMsg')
         input.errorBucket.push(errorMsg)
       }
     })

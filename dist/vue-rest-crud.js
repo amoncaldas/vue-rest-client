@@ -1657,7 +1657,7 @@ var Controller = /*#__PURE__*/function () {
       }
 
       if (!transaltion) {
-        console.error("The translation for a string ".concat(key, " passed via options, nor is present in 'crud.").concat(key, "' to be used via vue-i18n, so a fallback english string was used."));
+        console.error("The translation for the string ".concat(key, " was not passed via options, nor is present in 'crud.").concat(key, "' to be used via $t 'vue-i18n', so a fallback English string was used."));
         transaltion = _crudI18n["default"].crud[key] || key;
       }
 
@@ -1774,7 +1774,7 @@ var Controller = /*#__PURE__*/function () {
      * Checks whenever the default form $rf exists and if so, if it is valid
      * If invalid, reject the promise and show the invalid form error message
      *
-     * @param {*} reject
+     * @param {Function} reject
      * @returns boolean
      */
 
@@ -2380,7 +2380,7 @@ var CrudForm = /*#__PURE__*/function () {
       }
 
       if (!validForm && !this.options.skipShowValidationMsg) {
-        var errorMsg = this.options.invalidFormMsg || this.vm.$t('crud.invalidForm'); // as we are not sure about the error message size, use multi-line model for the toaster
+        var errorMsg = this.tanslateText('invalidFormMsg'); // as we are not sure about the error message size, use multi-line model for the toaster
 
         this.vm.showError(this.capitalize(errorMsg), {
           mode: 'multi-line'
@@ -2388,6 +2388,37 @@ var CrudForm = /*#__PURE__*/function () {
       }
 
       return validForm;
+    }
+    /**
+     * TRansalte text to be displayed
+     * @param {String} key
+     * @return {String} msg
+     */
+
+  }, {
+    key: "tanslateText",
+    value: function tanslateText(key) {
+      var transaltion;
+
+      if (this.options[key]) {
+        transaltion = this.options[key];
+      }
+
+      if (!transaltion && this.vm.$t) {
+        var translationPath = "crud.".concat(key);
+        var trans = this.vm.$t(translationPath);
+
+        if (trans !== translationPath) {
+          transaltion = trans;
+        }
+      }
+
+      if (!transaltion) {
+        console.error("The translation for the string ".concat(key, " was not passed via options, nor is present in 'crud.").concat(key, "' to be used via $t 'vue-i18n', so a fallback English string was used."));
+        transaltion = crudI18nEN.crud[key] || key;
+      }
+
+      return transaltion;
     }
     /**
      * Validate the required input attribute
@@ -2408,7 +2439,7 @@ var CrudForm = /*#__PURE__*/function () {
         if (input.valid && input.required && (input.inputValue === undefined || input.inputValue === null || input.inputValue === '')) {
           input.valid = validForm = false;
 
-          var errorMsg = "".concat(input.label, " ").concat(_this.vm.$t('crud.required')) || _this.vm.$t('crud.inputRequired');
+          var errorMsg = "".concat(input.label, " ").concat(_this.tanslateText('requiredMsg')) || _this.tanslateText('inputRequiredMsg');
 
           input.errorBucket.push(errorMsg);
         }

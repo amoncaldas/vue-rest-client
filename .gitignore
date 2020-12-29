@@ -1,7 +1,3 @@
 node_modules/
-tim_tests/
-npm_distribution/
-*~
-/nbproject/
 .DS_Store
 package-lock.json

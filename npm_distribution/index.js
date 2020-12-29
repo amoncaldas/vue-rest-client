@@ -57,7 +57,7 @@ var VueRestCrud = {
 }; // Define VueRestCrud for Node module pattern loaders, including Browserify
 
 if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && _typeof(module.exports) === 'object') {
-  module.exports = Openrouteservice; // define VueRestCrud as an AMD module
+  module.exports = VueRestCrud; // define VueRestCrud as an AMD module
   // eslint-disable-next-line no-undef
 } else if (typeof define === 'function' && define.amd) {
   // eslint-disable-next-line no-undef

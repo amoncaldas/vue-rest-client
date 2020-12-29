@@ -14,7 +14,7 @@ const VueRestCrud = {
 
 // Define VueRestCrud for Node module pattern loaders, including Browserify
 if (typeof module === 'object' && typeof module.exports === 'object') {
-  module.exports = Openrouteservice
+  module.exports = VueRestCrud
   // define VueRestCrud as an AMD module
   // eslint-disable-next-line no-undef
 } else if (typeof define === 'function' && define.amd) {

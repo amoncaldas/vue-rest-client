@@ -151,13 +151,7 @@ function CrudHttp() {
     });
   };
 
-  // Fix a strange bug
-  if (options instanceof CrudHttp && options.options) {
-    this.options = options.options;
-  } else {
-    this.options = options;
-  }
-
+  this.options = options;
   this.setDefaultOptions(); // Build an axios object
 
   var httpApi = _axios["default"].create({

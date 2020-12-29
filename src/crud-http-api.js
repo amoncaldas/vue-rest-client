@@ -15,12 +15,7 @@ class CrudHttp {
    * }
    */
   constructor (options = {}) {
-    // Fix a strange bug
-    if (options instanceof CrudHttp && options.options) {
-      this.options = options.options
-    } else {
-      this.options = options
-    }
+    this.options = options
     this.setDefaultOptions()
 
     // Build an axios object

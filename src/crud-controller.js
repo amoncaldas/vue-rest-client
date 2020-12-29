@@ -82,7 +82,7 @@
 
 import FormHelper from './form-helper'
 import crudI18nEN from './i18n/crud.i18n.en'
-class CRUD {
+class Controller {
   constructor (vm, modelService, options) {
     this.vm = vm
     this.modelService = modelService
@@ -100,7 +100,7 @@ class CRUD {
    * @param {*} options
    */
   static set (vm, modelService, options) {
-    return new CRUD(vm, modelService, options)
+    return new Controller(vm, modelService, options)
   }
 
   /**
@@ -662,6 +662,10 @@ const CRUDData = {
   modelService: null
 }
 
+let CRUD = {
+  Controller: Controller,
+  Data: CRUDData
+}
+
 // Export the CRUD and the CRUDData objects
-export {CRUD}
-export {CRUDData}
+export default CRUD

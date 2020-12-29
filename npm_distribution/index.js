@@ -9,10 +9,16 @@ Object.defineProperty(exports, "CrudHttpApi", {
     return _crudHttpApi["default"];
   }
 });
-Object.defineProperty(exports, "CRUDController", {
+Object.defineProperty(exports, "Controller", {
   enumerable: true,
   get: function get() {
     return _crudController["default"];
+  }
+});
+Object.defineProperty(exports, "Data", {
+  enumerable: true,
+  get: function get() {
+    return _crudData["default"];
   }
 });
 Object.defineProperty(exports, "FormHelper", {
@@ -38,6 +44,8 @@ var _crudHttpApi = _interopRequireDefault(require("./crud-http-api.js"));
 
 var _crudController = _interopRequireDefault(require("./crud-controller.js"));
 
+var _crudData = _interopRequireDefault(require("./crud-data.js"));
+
 var _formHelper = _interopRequireDefault(require("./form-helper.js"));
 
 var _modelService = _interopRequireDefault(require("./model-service.js"));
@@ -50,7 +58,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
 var VueRestCrud = {
   CrudHttpApi: _crudHttpApi["default"],
-  CRUD: _crudController["default"],
+  Controller: _crudController["default"],
+  Data: _crudData["default"],
   FormHelper: _formHelper["default"],
   ModelService: _modelService["default"],
   Model: _model["default"]

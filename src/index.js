@@ -1,12 +1,14 @@
 import CrudHttpApi from './crud-http-api.js'
-import CRUDController from './crud-controller.js'
+import Controller from './crud-controller.js'
+import Data from './crud-data.js'
 import FormHelper from './form-helper.js'
 import ModelService from './model-service.js'
 import Model from './model.js'
 
 const VueRestCrud = {
   CrudHttpApi: CrudHttpApi,
-  CRUD: CRUDController,
+  Controller: Controller,
+  Data: Data,
   FormHelper: FormHelper,
   ModelService: ModelService,
   Model: Model
@@ -27,7 +29,8 @@ if (typeof window !== 'undefined') {
 }
 
 export {CrudHttpApi}
-export {CRUDController}
+export {Controller}
+export {Data}
 export {FormHelper}
 export {ModelService}
 export {Model}

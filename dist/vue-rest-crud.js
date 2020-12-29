@@ -1567,7 +1567,7 @@ process.umask = function() { return 0; };
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.CRUDData = exports.CRUD = void 0;
+exports["default"] = void 0;
 
 var _formHelper = _interopRequireDefault(require("./form-helper"));
 
@@ -1581,9 +1581,9 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var CRUD = /*#__PURE__*/function () {
-  function CRUD(vm, modelService, options) {
-    _classCallCheck(this, CRUD);
+var Controller = /*#__PURE__*/function () {
+  function Controller(vm, modelService, options) {
+    _classCallCheck(this, Controller);
 
     _initialiseProps.call(this);
 
@@ -1601,7 +1601,7 @@ var CRUD = /*#__PURE__*/function () {
    */
 
 
-  _createClass(CRUD, [{
+  _createClass(Controller, [{
     key: "run",
 
     /**
@@ -1836,19 +1836,17 @@ var CRUD = /*#__PURE__*/function () {
   }], [{
     key: "set",
     value: function set(vm, modelService, options) {
-      return new CRUD(vm, modelService, options);
+      return new Controller(vm, modelService, options);
     }
   }]);
 
-  return CRUD;
+  return Controller;
 }();
 /**
  * CRUD data object that must be used to be injected as a collection of
  * data attribute in the vue data section
  */
 
-
-exports.CRUD = CRUD;
 
 var _initialiseProps = function _initialiseProps() {
   var _this2 = this;
@@ -2125,11 +2123,38 @@ var CRUDData = {
   resources: [],
   crudReady: false,
   modelService: null
+};
+var CRUD = {
+  Controller: Controller,
+  Data: CRUDData
 }; // Export the CRUD and the CRUDData objects
 
-exports.CRUDData = CRUDData;
+var _default = CRUD;
+exports["default"] = _default;
 
-},{"./form-helper":29,"./i18n/crud.i18n.en":30}],28:[function(require,module,exports){
+},{"./form-helper":30,"./i18n/crud.i18n.en":31}],28:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+/**
+ * CRUD data object that must be used to be injected as a collection of
+ * data attribute in the vue data section
+ */
+var CRUDData = {
+  resource: null,
+  resources: [],
+  crudReady: false,
+  modelService: null
+}; // Export the CRUD and the CRUDData objects
+
+var _default = CRUDData;
+exports["default"] = _default;
+
+},{}],29:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2303,7 +2328,7 @@ function CrudHttp() {
 var _default = CrudHttp;
 exports["default"] = _default;
 
-},{"axios":1}],29:[function(require,module,exports){
+},{"axios":1}],30:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2432,7 +2457,7 @@ var CrudForm = /*#__PURE__*/function () {
 var _default = CrudForm;
 exports["default"] = _default;
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2460,7 +2485,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2472,10 +2497,16 @@ Object.defineProperty(exports, "CrudHttpApi", {
     return _crudHttpApi["default"];
   }
 });
-Object.defineProperty(exports, "CRUDController", {
+Object.defineProperty(exports, "Controller", {
   enumerable: true,
   get: function get() {
     return _crudController["default"];
+  }
+});
+Object.defineProperty(exports, "Data", {
+  enumerable: true,
+  get: function get() {
+    return _crudData["default"];
   }
 });
 Object.defineProperty(exports, "FormHelper", {
@@ -2501,6 +2532,8 @@ var _crudHttpApi = _interopRequireDefault(require("./crud-http-api.js"));
 
 var _crudController = _interopRequireDefault(require("./crud-controller.js"));
 
+var _crudData = _interopRequireDefault(require("./crud-data.js"));
+
 var _formHelper = _interopRequireDefault(require("./form-helper.js"));
 
 var _modelService = _interopRequireDefault(require("./model-service.js"));
@@ -2513,7 +2546,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
 var VueRestCrud = {
   CrudHttpApi: _crudHttpApi["default"],
-  CRUD: _crudController["default"],
+  Controller: _crudController["default"],
+  Data: _crudData["default"],
   FormHelper: _formHelper["default"],
   ModelService: _modelService["default"],
   Model: _model["default"]
@@ -2531,7 +2565,7 @@ if (typeof window !== 'undefined') {
   window.VueRestCrud = VueRestCrud;
 }
 
-},{"./crud-controller.js":27,"./crud-http-api.js":28,"./form-helper.js":29,"./model-service.js":32,"./model.js":33}],32:[function(require,module,exports){
+},{"./crud-controller.js":27,"./crud-data.js":28,"./crud-http-api.js":29,"./form-helper.js":30,"./model-service.js":33,"./model.js":34}],33:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2858,7 +2892,7 @@ var modelCollection = function modelCollection(value, context) {
 var _default = ModelService;
 exports["default"] = _default;
 
-},{"./crud-http-api":28,"./model":33}],33:[function(require,module,exports){
+},{"./crud-http-api":29,"./model":34}],34:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3152,4 +3186,4 @@ var _initialiseProps = function _initialiseProps() {
 var _default = Model;
 exports["default"] = _default;
 
-},{"./crud-http-api":28}]},{},[31]);
+},{"./crud-http-api":29}]},{},[32]);

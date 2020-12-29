@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.CRUDData = exports.CRUD = void 0;
+exports["default"] = void 0;
 
 var _formHelper = _interopRequireDefault(require("./form-helper"));
 
@@ -17,9 +17,9 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var CRUD = /*#__PURE__*/function () {
-  function CRUD(vm, modelService, options) {
-    _classCallCheck(this, CRUD);
+var Controller = /*#__PURE__*/function () {
+  function Controller(vm, modelService, options) {
+    _classCallCheck(this, Controller);
 
     _initialiseProps.call(this);
 
@@ -37,7 +37,7 @@ var CRUD = /*#__PURE__*/function () {
    */
 
 
-  _createClass(CRUD, [{
+  _createClass(Controller, [{
     key: "run",
 
     /**
@@ -272,19 +272,17 @@ var CRUD = /*#__PURE__*/function () {
   }], [{
     key: "set",
     value: function set(vm, modelService, options) {
-      return new CRUD(vm, modelService, options);
+      return new Controller(vm, modelService, options);
     }
   }]);
 
-  return CRUD;
+  return Controller;
 }();
 /**
  * CRUD data object that must be used to be injected as a collection of
  * data attribute in the vue data section
  */
 
-
-exports.CRUD = CRUD;
 
 var _initialiseProps = function _initialiseProps() {
   var _this2 = this;
@@ -561,6 +559,11 @@ var CRUDData = {
   resources: [],
   crudReady: false,
   modelService: null
+};
+var CRUD = {
+  Controller: Controller,
+  Data: CRUDData
 }; // Export the CRUD and the CRUDData objects
 
-exports.CRUDData = CRUDData;
+var _default = CRUD;
+exports["default"] = _default;

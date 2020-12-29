@@ -2345,6 +2345,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _crudI18n = _interopRequireDefault(require("./i18n/crud.i18n.en"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -2415,7 +2419,7 @@ var CrudForm = /*#__PURE__*/function () {
 
       if (!transaltion) {
         console.error("The translation for the string ".concat(key, " was not passed via options, nor is present in 'crud.").concat(key, "' to be used via $t 'vue-i18n', so a fallback English string was used."));
-        transaltion = crudI18nEN.crud[key] || key;
+        transaltion = _crudI18n["default"].crud[key] || key;
       }
 
       return transaltion;
@@ -2497,7 +2501,7 @@ var CrudForm = /*#__PURE__*/function () {
 var _default = CrudForm;
 exports["default"] = _default;
 
-},{}],31:[function(require,module,exports){
+},{"./i18n/crud.i18n.en":31}],31:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

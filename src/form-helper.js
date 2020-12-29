@@ -1,3 +1,4 @@
+import crudI18nEN from './i18n/crud.i18n.en'
 class CrudForm {
   constructor (formRef, context, options) {
     this.formRef = formRef

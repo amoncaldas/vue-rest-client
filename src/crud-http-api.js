@@ -49,7 +49,10 @@ class CrudHttp {
     }
 
     if(typeof this.options.getVueInstance !== "function"){
-      this.options.getVueInstance = function () { return console.error('the vue instance getting function was not defined') }
+      this.options.getVueInstance = function () { 
+        console.log('The vue instance getting function was not defined') 
+        return null
+      }
     }
 
     if (typeof this.options.appendLocaleToHeader === 'undefined') {

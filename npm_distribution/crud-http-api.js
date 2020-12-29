@@ -57,7 +57,8 @@ function CrudHttp() {
 
     if (typeof _this.options.getVueInstance !== "function") {
       _this.options.getVueInstance = function () {
-        return console.error('the vue instance getting function was not defined');
+        console.log('The vue instance getting function was not defined');
+        return null;
       };
     }
 

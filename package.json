@@ -58,5 +58,20 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/amoncaldas/vue-rest-client.git"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/amoncaldas/vue-rest-client/issues"
+  },
+  "homepage": "https://github.com/amoncaldas/vue-rest-client#readme",
+  "keywords": [
+    "VueJS",
+    "RESTfull",
+    "active",
+    "record",
+    "API",
+    "model",
+    "service",
+    "http",
+    "client"
+  ]
 }

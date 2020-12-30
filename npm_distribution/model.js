@@ -47,8 +47,8 @@ var Model = /*#__PURE__*/function () {
     this.$options = options;
     this.$endPoint = endPoint;
     this.$name = resourceName;
-    var crudApi = new _httpClient["default"](options.http);
-    this.$http = crudApi.http; // If the value is undefined, create a empty obj
+    var httpClient = new _httpClient["default"](options.httpClientOptions);
+    this.$http = httpClient.http; // If the value is undefined, create a empty obj
 
     value = value || {}; // Transform the empty Model object in a Model with values (active record)
 

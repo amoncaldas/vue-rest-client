@@ -1,4 +1,4 @@
-import CrudApi from './http-client'
+import HttpClient from './http-client'
 
 /**
  * Model class that acts as an active record representation of the resource in a remote server
@@ -27,8 +27,8 @@ class Model {
     this.$endPoint = endPoint
     this.$name = resourceName
 
-    let crudApi = new CrudApi(options.http)
-    this.$http = crudApi.http
+    let httpClient = new HttpClient(options.httpClientOptions)
+    this.$http = httpClient.http
 
     // If the value is undefined, create a empty obj
     value = value || {}

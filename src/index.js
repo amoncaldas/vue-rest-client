@@ -1,36 +1,36 @@
-import CrudHttpApi from './crud-http-api.js'
+import HttpClient from './http-client.js'
 import Controller from './crud-controller.js'
-import Data from './crud-data.js'
+import CrudData from './crud-data.js'
 import FormHelper from './form-helper.js'
 import ModelService from './model-service.js'
 import Model from './model.js'
 
-const VueRestCrud = {
-  CrudHttpApi: CrudHttpApi,
+const VueRestClient = {
+  HttpClient: HttpClient,
   Controller: Controller,
-  Data: Data,
+  CrudData: CrudData,
   FormHelper: FormHelper,
   ModelService: ModelService,
   Model: Model
 }
 
-// Define VueRestCrud for Node module pattern loaders, including Browserify
+// Define VueRestClient for Node module pattern loaders, including Browserify
 if (typeof module === 'object' && typeof module.exports === 'object') {
-  module.exports = VueRestCrud
-  // define VueRestCrud as an AMD module
+  module.exports = VueRestClient
+  // define VueRestClient as an AMD module
   // eslint-disable-next-line no-undef
 } else if (typeof define === 'function' && define.amd) {
   // eslint-disable-next-line no-undef
-  define(VueRestCrud)
+  define(VueRestClient)
 }
 
 if (typeof window !== 'undefined') {
-  window.VueRestCrud = VueRestCrud
+  window.VueRestClient = VueRestClient
 }
 
-export {CrudHttpApi}
+export {HttpClient}
 export {Controller}
-export {Data}
+export {CrudData}
 export {FormHelper}
 export {ModelService}
 export {Model}

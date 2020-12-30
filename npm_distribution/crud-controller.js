@@ -47,18 +47,19 @@ var Controller = /*#__PURE__*/function () {
     value: function run() {
       var _this = this;
 
-      this.vm.resource = this.modelService.newModelInstance(); // Add the CRUD methods to the view model (vm) passed to the constructor
+      this.vm.resource = this.modelService.newModelInstance(); // Add the CRUD methods to the vue compnent (vm) passed via  constructor
 
       this.vm.index = this.index;
       this.vm.get = this.get;
       this.vm.save = this.save;
       this.vm.update = this.update;
       this.vm.destroy = this.destroy;
-      this.vm.confirmAndDestroy = this.confirmAndDestroy;
-      this.vm.showSuccess = this.options.showSuccess || this.vm.showSuccess || this.showSuccess;
-      this.vm.showInfo = this.options.showInfo || this.vm.showInfo || this.showSuccess;
-      this.vm.showError = this.options.showError || this.vm.showError || this.showSuccess;
-      this.vm.confirmDialog = this.options.confirmDialog || this.vm.confirmDialog || this.confirmDialog; // If quey on start up is enabled,
+      this.vm.confirmAndDestroy = this.confirmAndDestroy; // Add the toaster methods to the vue compnent (vm) passed via  constructor (if not available, use fallback methods)
+
+      this.vm.showSuccess = this.options.showSuccess || this.vm.showSuccess || this.fallBackShowSuccess;
+      this.vm.showInfo = this.options.showInfo || this.vm.showInfo || this.fallBackShowInfo;
+      this.vm.showError = this.options.showError || this.vm.showError || this.fallBackShowError;
+      this.vm.confirmDialog = this.options.confirmDialog || this.vm.confirmDialog || this.fallBackConfirmDialog; // If quey on start up is enabled,
       // run the initial query
 
       if (this.options.queryOnStartup) {
@@ -75,22 +76,36 @@ var Controller = /*#__PURE__*/function () {
      */
 
   }, {
-    key: "tanslateText",
-    value: function tanslateText(key) {
+    key: "translateText",
+    value: function translateText(key) {
       var transaltion;
 
       if (this.options[key]) {
         transaltion = this.options[key];
-      }
+      } // If a custom translate function was passed via options, use it
+
+
+      if (!transaltion && this.options.translateFn && typeof this.options.translateFn == "function") {
+        transaltion = this.options.translateFn(key);
+      } // If vue-i18n is present in the app
+      // then the $t function must be defined.
+      // We check and try to use it.
+
 
       if (!transaltion && this.vm.$t) {
         var translationPath = "crud.".concat(key);
-        var trans = this.vm.$t(translationPath);
+        var trans = this.vm.$t(translationPath); // Even if $t, the key must not be
+        // present in the expected translation
+        // path. So we make sure that the result 
+        // is not the same of the path
 
         if (trans !== translationPath) {
           transaltion = trans;
         }
-      }
+      } // If none of the tries above work
+      // then an error is logged in the console and the 
+      // fallback english ext for the given key is used.
+
 
       if (!transaltion) {
         console.error("The translation for the string ".concat(key, " was not passed via options, nor is present in 'crud.").concat(key, "' to be used via $t 'vue-i18n', so a fallback English string was used."));
@@ -178,7 +193,7 @@ var Controller = /*#__PURE__*/function () {
       if (proceed === false) {
         var error = "proceed stopped on ".concat(callbackFunc, " function");
         console.log(error);
-        var errorMsg = this.tanslateText('operationAbortedMsg');
+        var errorMsg = this.translateText('operationAbortedMsg');
         this.vm.showInfo(this.capitalize(errorMsg), {
           mode: 'multi-line'
         }); // In the default CRUD usage, it is not necessary to
@@ -227,7 +242,7 @@ var Controller = /*#__PURE__*/function () {
       validForm = formHelper.validate();
 
       if (!validForm) {
-        var errorMsg = this.tanslateText('invalidFormMsg'); // In the default CRUD usage, it is not necessary to
+        var errorMsg = this.translateText('invalidFormMsg'); // In the default CRUD usage, it is not necessary to
         // listen to the promise result
         // if the promise is not being listened
         // it can raise an error when rejected/resolved.
@@ -313,25 +328,33 @@ var Controller = /*#__PURE__*/function () {
 var _initialiseProps = function _initialiseProps() {
   var _this2 = this;
 
-  this.showSuccess = function (msg, options) {
+  this.fallBackShowSuccess = function (msg, options) {
     console.log(msg, options);
   };
 
-  this.showInfo = function (msg, options) {
+  this.fallBackShowInfo = function (msg, options) {
     console.info(msg, options);
   };
 
-  this.showError = function (msg, options) {
+  this.fallBackShowError = function (msg, options) {
     console.error(msg, options);
   };
 
-  this.confirmDialog = function (msg, options) {
+  this.fallBackConfirmDialog = function (msg, options) {
     var error = 'Confirm dialog function was not properly passed via parameters. Check the console to see more info.';
-    console.error(error, msg, options); // As the confirm dialog function was not defined, the action has been cancelled
+    console.error(error, msg, options);
 
-    return new Promise(function (resolve, reject) {
-      reject(error);
-    });
+    if (_this2.options.skipDestroyConfirmation) {
+      // As the confirm dialog function was not defined, the action has been cancelled
+      return new Promise(function (resolve, reject) {
+        resolve(true);
+      });
+    } else {
+      // As the confirm dialog function was not defined, the action has been cancelled
+      return new Promise(function (resolve, reject) {
+        reject(error);
+      });
+    }
   };
 
   this.index = function (filters) {
@@ -361,7 +384,7 @@ var _initialiseProps = function _initialiseProps() {
           resolve(resources);
         }, function (errorResponse) {
           // Handle the error response
-          context.handleError(errorResponse, context.tanslateText('failWhileTryingToGetTheResourceMsg')); // if it is being run because of a queryOnStartup flag, so we need to tell
+          context.handleError(errorResponse, context.translateText('failWhileTryingToGetTheResourceMsg')); // if it is being run because of a queryOnStartup flag, so we need to tell
           // the client that the crud request is done
 
           if (context.options.queryOnStartup) {
@@ -391,7 +414,7 @@ var _initialiseProps = function _initialiseProps() {
           resolve(context.vm.resource);
         }, function (errorResponse) {
           // Handle the error response
-          context.handleError(errorResponse, context.tanslateText('failWhileTryingToGetTheResourceMsg')); // In the default CRUD usage, it is not necessary to
+          context.handleError(errorResponse, context.translateText('failWhileTryingToGetTheResourceMsg')); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.
@@ -415,7 +438,7 @@ var _initialiseProps = function _initialiseProps() {
         var postResource = context.vm.resource.$strip(context.vm.resource);
 
         if (Object.keys(postResource).length === 0) {
-          var msg = context.tanslateText('resourceEmptyMsg').replace(':resource', context.vm.resource.$getName());
+          var msg = context.translateText('resourceEmptyMsg').replace(':resource', context.vm.resource.$getName());
           context.vm.showError(context.capitalize(msg), {
             mode: 'multi-line'
           });
@@ -425,7 +448,7 @@ var _initialiseProps = function _initialiseProps() {
             // the return is an object containing a resource/Model instance and a (optional) message property
             context.vm.resource = data.resource; // Define the save confirmation message to be displayed
 
-            var msg = data.message || context.tanslateText('resourceSavedMsg').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
+            var msg = data.message || context.translateText('resourceSavedMsg').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
 
             context.vm.showSuccess(context.capitalize(msg), {
               mode: 'multi-line'
@@ -445,7 +468,7 @@ var _initialiseProps = function _initialiseProps() {
             resolve(context.vm.resource);
           }, function (errorResponse) {
             // Handle the error response
-            context.handleError(errorResponse, context.tanslateText('failWhileTryingToSaveResourceMsg')); // In the default CRUD usage, it is not necessary to
+            context.handleError(errorResponse, context.translateText('failWhileTryingToSaveResourceMsg')); // In the default CRUD usage, it is not necessary to
             // listen to the promise result
             // if the promise is not being listened
             // it can raise an error when rejected/resolved.
@@ -469,7 +492,7 @@ var _initialiseProps = function _initialiseProps() {
           // the return is an object containing a resource/Model instance and a (optional) message property
           context.vm.resource = data.resource; // Define the save confirmation message to be displayed
 
-          var msg = data.message || context.tanslateText('resourceUpdatedMsg').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
+          var msg = data.message || context.translateText('resourceUpdatedMsg').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
 
           context.vm.showSuccess(context.capitalize(msg), {
             mode: 'multi-line'
@@ -489,7 +512,7 @@ var _initialiseProps = function _initialiseProps() {
           resolve(context.vm.resource);
         }, function (errorResponse) {
           // Handle the error response
-          context.handleError(errorResponse, context.tanslateText('failWhileTryingToUpdateResourceMsg')); // In the default CRUD usage, it is not necessary to
+          context.handleError(errorResponse, context.translateText('failWhileTryingToUpdateResourceMsg')); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.
@@ -505,9 +528,9 @@ var _initialiseProps = function _initialiseProps() {
     var context = _this2;
     return new Promise(function (resolve, reject) {
       // Define the conformation modal title to be displayed before destroying
-      var confirmTitle = context.tanslateText('removalConfirmTitle'); // Define the conformation modal text to be displayed before destroying
+      var confirmTitle = context.translateText('removalConfirmTitle'); // Define the conformation modal text to be displayed before destroying
 
-      var confirmMessage = context.tanslateText('doYouReallyWantToRemoveMsg').replace(':resource', context.vm.resource.$getName()); // Open the confirmation modal and wait for the response in a promise
+      var confirmMessage = context.translateText('doYouReallyWantToRemoveMsg').replace(':resource', context.vm.resource.$getName()); // Open the confirmation modal and wait for the response in a promise
 
       context.vm.confirmDialog(confirmTitle, confirmMessage).then(function () {
         // if the user confirms the destroy, run it
@@ -520,7 +543,7 @@ var _initialiseProps = function _initialiseProps() {
       }, function (error) {
         // If the user has clicked `no` in the dialog, abort the destroy and show an aborted message
         // Define the error message to be displayed
-        var msg = context.tanslateText('destroyAbortedMsg'); // show the abort message as an info
+        var msg = context.translateText('destroyAbortedMsg'); // show the abort message as an info
 
         context.vm.showInfo(msg); // In the default CRUD usage, it is not necessary to
         // listen to the promise result
@@ -541,7 +564,7 @@ var _initialiseProps = function _initialiseProps() {
       if (proceed) {
         resource.$destroy().then(function (data) {
           // Define the save confirmation message to be displayed
-          var msg = data.message || context.tanslateText('resourceDestroyed').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
+          var msg = data.message || context.translateText('resourceDestroyed').replace(':resource', context.vm.resource.$getName()); // Capitalize and use multiline to be sure that the message won be truncated (we don't know the how big the messages from server can be)
 
           context.vm.showSuccess(context.capitalize(msg), {
             mode: 'multi-line'
@@ -561,7 +584,7 @@ var _initialiseProps = function _initialiseProps() {
           resolve();
         }, function (errorResponse) {
           // Handle the error response
-          context.handleError(errorResponse, context.tanslateText('failWhileTryingToDestroyResourceMsg')); // In the default CRUD usage, it is not necessary to
+          context.handleError(errorResponse, context.translateText('failWhileTryingToDestroyResourceMsg')); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.

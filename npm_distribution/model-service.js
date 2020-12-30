@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _crudHttpApi = _interopRequireDefault(require("./crud-http-api"));
+var _httpClient = _interopRequireDefault(require("./http-client"));
 
 var _model = _interopRequireDefault(require("./model"));
 
@@ -41,8 +41,8 @@ function ModelService(endPoint, resourceName, options) {
   this.endPointTemplate = endPoint;
   this.resourceName = resourceName;
   this.options = options;
-  var crudHttp = new _crudHttpApi["default"](options.http);
-  this.httpApi = crudHttp.http;
+  var httpClient = new _httpClient["default"](options.httpClientOptions);
+  this.httpClient = httpClient.http;
   /**
    * Provides an accessor to get the name of the resource
    */
@@ -107,7 +107,7 @@ function ModelService(endPoint, resourceName, options) {
 
   this.query = function (filters) {
     var endpointAppend = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-    var http = _this.httpApi;
+    var http = _this.httpClient;
     return new Promise(function (resolve, reject) {
       var endPoint = _this.endPoint + endpointAppend;
       endPoint += _this.buildParams(filters);
@@ -162,7 +162,7 @@ function ModelService(endPoint, resourceName, options) {
     var cOptions = customOptions || options; // set the raw option
 
     cOptions.raw = cOptions.raw === undefined ? options.raw : cOptions.raw;
-    var http = _this.httpApi;
+    var http = _this.httpClient;
     return new Promise(function (resolve, reject) {
       endPoint = endPoint || _this.getEndPoint();
       var request = {
@@ -214,7 +214,7 @@ function ModelService(endPoint, resourceName, options) {
 
 
   this.get = function (pkValue) {
-    var http = _this.httpApi;
+    var http = _this.httpClient;
     return new Promise(function (resolve, reject) {
       var endPoint = "".concat(_this.endPoint, "/").concat(pkValue);
       var request = {
@@ -287,7 +287,7 @@ function ModelService(endPoint, resourceName, options) {
   return this;
 }
 /**
- * Transform the raw returned data in a active record Model
+ * Transform the raw returned data into an active record Model
  * @param {*} rawObj
  * @param {*} arrayInst
  * @param {*} context
@@ -296,7 +296,7 @@ function ModelService(endPoint, resourceName, options) {
 
 var wrapAsNewModelInstance = function wrapAsNewModelInstance(rawObj, arrayInst, context) {
   // create an instance
-  var instance = rawObj.constructor === _model["default"] ? rawObj : new _model["default"](rawObj, context.endPoint, context.resourceName, context.options); // set a pointer to the array
+  var instance = rawObj.constructor === _model["default"] ? rawObj : new _model["default"](rawObj, context.endPoint, context.resourceName, context.options); // Set a pointer to the array
 
   instance.$$array = arrayInst;
   return instance;

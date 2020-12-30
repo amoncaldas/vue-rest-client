@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-class CrudHttp {
+class HttpClient {
   /**
    * Build and cofigure the http client instance
    * @param {Object} options - object containing:
@@ -11,11 +11,11 @@ class CrudHttp {
    *  geLocale: Function,
    *  appendLocaleToHeader: Boolean,
    *  appendLocaleToGetUrl: Boolean,
-   *  urlLocalKey: String
+   *  urlLocaleKey: String
    * }
    */
-  constructor (options = {}) {
-    this.options = options
+  constructor (options = null) {
+    this.options = options || {}
     this.setDefaultOptions()
 
     // Build an axios object
@@ -60,8 +60,9 @@ class CrudHttp {
 
     if (typeof this.options.appendLocaleToGetUrl === 'undefined') {
       this.options.appendLocaleToGetUrl = false
-    } else if (this.options.appendLocaleToGetUrl === true) {
-      this.options.urlLocalKey = this.options.urlLocalKey || 'l'
+    } 
+    if (this.options.appendLocaleToGetUrl === true) {
+      this.options.urlLocaleKey = this.options.urlLocaleKey || 'l'
     }
   }
 
@@ -94,7 +95,7 @@ class CrudHttp {
       config.headers.common['locale'] = this.options.geLocale()
     }
     if (this.options.appendLocaleToGetUrl) {
-      let lUrlKey = this.options.urlLocalKey
+      let lUrlKey = this.options.urlLocaleKey
       let urlQueryString = `=${lUrlKey}`
 
       // Check if the locael query string should be added
@@ -153,4 +154,4 @@ class CrudHttp {
     })
   }
 }
-export default CrudHttp
+export default HttpClient

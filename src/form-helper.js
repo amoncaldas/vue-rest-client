@@ -14,7 +14,9 @@ class CrudForm {
     if (this.options.skipFormValidation) {
       return true
     }
-    let validForm = this.formRef.validate()
+    if (this.formRef.validate && typeof this.formRef.validate === "function") {
+      let validForm = this.formRef.validate()
+    }
 
     // Validate the native `required` input attribute
     // that is not validated by the form.validate()
@@ -70,7 +72,9 @@ class CrudForm {
       if (input.valid && input.required && (input.inputValue === undefined || input.inputValue === null || input.inputValue === '')) {
         input.valid = validForm = false
         let errorMsg = `${input.label} ${this.tanslateText('requiredMsg')}` || this.tanslateText('inputRequiredMsg')
-        input.errorBucket.push(errorMsg)
+        if (input.errorBucket && Array.isArray(input.errorBucket)) {
+          input.errorBucket.push(errorMsg)
+        }
       }
     })
     return validForm

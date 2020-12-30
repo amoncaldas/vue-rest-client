@@ -3,10 +3,10 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-Object.defineProperty(exports, "CrudHttpApi", {
+Object.defineProperty(exports, "HttpClient", {
   enumerable: true,
   get: function get() {
-    return _crudHttpApi["default"];
+    return _httpClient["default"];
   }
 });
 Object.defineProperty(exports, "Controller", {
@@ -15,7 +15,7 @@ Object.defineProperty(exports, "Controller", {
     return _crudController["default"];
   }
 });
-Object.defineProperty(exports, "Data", {
+Object.defineProperty(exports, "CrudData", {
   enumerable: true,
   get: function get() {
     return _crudData["default"];
@@ -40,7 +40,7 @@ Object.defineProperty(exports, "Model", {
   }
 });
 
-var _crudHttpApi = _interopRequireDefault(require("./crud-http-api.js"));
+var _httpClient = _interopRequireDefault(require("./http-client.js"));
 
 var _crudController = _interopRequireDefault(require("./crud-controller.js"));
 
@@ -56,23 +56,23 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-var VueRestCrud = {
-  CrudHttpApi: _crudHttpApi["default"],
+var VueRestClient = {
+  HttpClient: _httpClient["default"],
   Controller: _crudController["default"],
-  Data: _crudData["default"],
+  CrudData: _crudData["default"],
   FormHelper: _formHelper["default"],
   ModelService: _modelService["default"],
   Model: _model["default"]
-}; // Define VueRestCrud for Node module pattern loaders, including Browserify
+}; // Define VueRestClient for Node module pattern loaders, including Browserify
 
 if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === 'object' && _typeof(module.exports) === 'object') {
-  module.exports = VueRestCrud; // define VueRestCrud as an AMD module
+  module.exports = VueRestClient; // define VueRestClient as an AMD module
   // eslint-disable-next-line no-undef
 } else if (typeof define === 'function' && define.amd) {
   // eslint-disable-next-line no-undef
-  define(VueRestCrud);
+  define(VueRestClient);
 }
 
 if (typeof window !== 'undefined') {
-  window.VueRestCrud = VueRestCrud;
+  window.VueRestClient = VueRestClient;
 }

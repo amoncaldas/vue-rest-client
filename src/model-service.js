@@ -1,4 +1,4 @@
-import CrudHttp from './crud-http-api'
+import HttpClient from './http-client'
 import Model from './model'
 
 /**
@@ -28,8 +28,8 @@ function ModelService (endPoint, resourceName, options) {
   this.endPointTemplate = endPoint
   this.resourceName = resourceName
   this.options = options
-  let crudHttp = new CrudHttp(options.http)
-  this.httpApi = crudHttp.http
+  let httpClient = new HttpClient(options.httpClientOptions)
+  this.httpClient = httpClient.http
 
   /**
    * Provides an accessor to get the name of the resource
@@ -84,7 +84,7 @@ function ModelService (endPoint, resourceName, options) {
    * @param {*} filters  filters to be applied to retrieve the resources
    */
   this.query = (filters, endpointAppend = '') => {
-    let http = this.httpApi
+    let http = this.httpClient
     return new Promise((resolve, reject) => {
       let endPoint = this.endPoint + endpointAppend
       endPoint += this.buildParams(filters)
@@ -138,7 +138,7 @@ function ModelService (endPoint, resourceName, options) {
     // set the raw option
     cOptions.raw = cOptions.raw === undefined ? options.raw : cOptions.raw
 
-    let http = this.httpApi
+    let http = this.httpClient
     return new Promise((resolve, reject) => {
       endPoint = endPoint || this.getEndPoint()
 
@@ -189,7 +189,7 @@ function ModelService (endPoint, resourceName, options) {
    * @param string|numeric id
    */
   this.get = (pkValue) => {
-    let http = this.httpApi
+    let http = this.httpClient
     return new Promise((resolve, reject) => {
       let endPoint = `${this.endPoint}/${pkValue}`
 
@@ -259,7 +259,7 @@ function ModelService (endPoint, resourceName, options) {
 }
 
 /**
- * Transform the raw returned data in a active record Model
+ * Transform the raw returned data into an active record Model
  * @param {*} rawObj
  * @param {*} arrayInst
  * @param {*} context
@@ -268,7 +268,7 @@ const wrapAsNewModelInstance = (rawObj, arrayInst, context) => {
   // create an instance
   var instance = rawObj.constructor === Model ? rawObj : new Model(rawObj, context.endPoint, context.resourceName, context.options)
 
-  // set a pointer to the array
+  // Set a pointer to the array
   instance.$$array = arrayInst
 
   return instance

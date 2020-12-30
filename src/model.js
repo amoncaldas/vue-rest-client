@@ -1,4 +1,4 @@
-import CrudApi from './crud-http-api'
+import CrudApi from './http-client'
 
 /**
  * Model class that acts as an active record representation of the resource in a remote server

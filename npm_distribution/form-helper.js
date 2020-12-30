@@ -36,8 +36,11 @@ var CrudForm = /*#__PURE__*/function () {
         return true;
       }
 
-      var validForm = this.formRef.validate(); // Validate the native `required` input attribute
+      if (this.formRef.validate && typeof this.formRef.validate === "function") {
+        var _validForm = this.formRef.validate();
+      } // Validate the native `required` input attribute
       // that is not validated by the form.validate()
+
 
       if (!this.validateRequiredFields()) {
         validForm = false;
@@ -105,7 +108,9 @@ var CrudForm = /*#__PURE__*/function () {
 
           var errorMsg = "".concat(input.label, " ").concat(_this.tanslateText('requiredMsg')) || _this.tanslateText('inputRequiredMsg');
 
-          input.errorBucket.push(errorMsg);
+          if (input.errorBucket && Array.isArray(input.errorBucket)) {
+            input.errorBucket.push(errorMsg);
+          }
         }
       });
       return validForm;

@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _crudHttpApi = _interopRequireDefault(require("./crud-http-api"));
+var _httpClient = _interopRequireDefault(require("./http-client"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -47,7 +47,7 @@ var Model = /*#__PURE__*/function () {
     this.$options = options;
     this.$endPoint = endPoint;
     this.$name = resourceName;
-    var crudApi = new _crudHttpApi["default"](options.http);
+    var crudApi = new _httpClient["default"](options.http);
     this.$http = crudApi.http; // If the value is undefined, create a empty obj
 
     value = value || {}; // Transform the empty Model object in a Model with values (active record)

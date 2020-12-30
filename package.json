@@ -1,7 +1,7 @@
 {
   "name": "vue-rest-client",
   "version": "0.1.0",
-  "description": "A VueJS RESTfull client component to easily integrate apps with APIs",
+  "description": "A VueJS RESTful client component to easily integrate apps with APIs",
   "author": "Amon Caldas",
   "license": "Apache-2.0",
   "main": "./npm_distribution/index.js",

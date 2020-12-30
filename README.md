@@ -1,13 +1,13 @@
 # Vue rest client #
 
-The VueRestClient integrates [Axios](https://github.com/axios/axios) and the concept of [Active Record](https://en.wikipedia.org/wiki/Active_record_pattern)) to allows the communication with a back-end api with minimum code. It has an integrated http client with request and response interceptors that allows using authentication (via header Bearer) and localization via header and url parameter that can be automatically added if your options tell so. It can also optionally send request pending events (when still pending and when all are finished) so that you can catch these events and show a loading component.
+The VueRestClient integrates [Axios](https://github.com/axios/axios) and the concept of [Active Record](https://en.wikipedia.org/wiki/Active_record_pattern) to allows the communication with a back-end api with minimum code. It has an integrated http client with request and response interceptors that allows using authentication (via header Bearer) and localization via header and url parameter that can be automatically added if your options tell so. It can also optionally send request pending events (when still pending and when all are finished) so that you can catch these events and show a loading component.
 
 There are four ways to use this component:
 
-- The http client as an stand alone client (with authentication, localization and loading events)
-- Define a Model Service that will be linked to a resource and perform CRUD operations
-- Use the `CrudController` attached to a component, so that it will have the `save`, `get`, `index` and `update`, `confirmAndDestroy` and `destroy`. Additionally it also adds form validation, callbacks that allow you to listen to events and intercept actions and options that allow you to customize behaviors and message translations.
-- A combination of the three options above for specific cases
+1. Use the `HttpClient` as an stand-alone client (supporting Bearer authentication, localization and loading events).
+2. Define a `ModelService` that will be linked to a resource and perform CRUD operations.
+3. Use the `CrudController` attached to a component, so that it will have the `save`, `get`, `index`, `update`, `destroy` and `confirmAndDestroy`. Additionally it also can automatically add form validation, callbacks that allow you to listen to events and intercept actions, and options that allow you to customize behaviors and message translations.
+4. A combination of the three previously listed use cases.
 
 ## How to install ##
 

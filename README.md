@@ -2,6 +2,8 @@
 
 The VueRestClient integrates [Axios](https://github.com/axios/axios) and the concept of [Active Record](https://en.wikipedia.org/wiki/Active_record_pattern) to allows the communication with a back-end api with minimum code. It has an integrated http client with request and response interceptors that allows using authentication (via header Bearer) and localization via header and url parameter that can be automatically added if your options tell so. It can also optionally send request pending events (when still pending and when all are finished) so that you can catch these events and show a loading component.
 
+It was tested with VueJS 2.x, but might work with newer versions.
+
 There are four ways to use this component:
 
 1. Use the `HttpClient` as an stand-alone client (supporting Bearer authentication, localization and loading events).
@@ -264,3 +266,47 @@ If the vue `component` passed via `vm` to which you are adding the CRUD has one 
 
 Form validation:
 If the vue `component` passed via `vm` to which you are adding the CRUD has a `$ref` named `form` and it does not have the option `skipFormValidation` defined as `true`, the auto form validation will be ran before saving and updating resources.
+
+## Example of template with CrudController and Crud features ##
+
+```html
+<!-- the `crudReady` property was added my the CrudController -->
+<v-form ref="form" v-if="crudReady" @keyup.native.enter="save"> <!-- this `save` method was added by the CrudController -->
+  <input required v-model="resource.username"> <!-- the `resource` object was created/added by the CrudData and you can define custom properties, like `username` in this case -->
+  <input required v-model="resource.email"> <!-- the `resource` object was created/added by the CrudData and you can define custom properties, like `email` in this case -->
+  <!-- the `crudReady` and `save` method were added my the CrudController -->
+  <button v-if="crudReady" @click="save">Save</button>
+</v-form>
+
+<!-- if queryOnStartup was passed as true via options the resources will be listed when the app runs -->
+<!-- if skipAutoIndexAfterSave was not passed as false via options the resources will be updated automatically when a resource is saved -->
+<div class='listing-resources-example'>
+  <template  v-for="(resource, index) in resources">
+    <p><b>username</b>: {{resource.username}}</p>
+    <p><b>Email</b>: {{resource.email}}</p>
+  </template >
+</div>
+```
+
+### When the save button is hit, the following happens (default flow) ###
+
+1. The `save` method created by the `CrudController` is called. Internally, `create` or `update` will be called depending it the resource has the primary key value.
+2. The the validation will be performed (if it was not disabled via options)
+3. The `transformRequest` will be run, if defined.
+4. The request is run using the endpoint defined in the `ModelService` instance.
+5. If `transformResponse` is defined, it will be run.
+6. If auto run index after saving is active, an `index` request (that retrieves all the resources) will be made. It can be skipped by passing `skipAutoIndexAfterSave:true` via options).
+7. The `afterSave` call back will be called, if defined, passing the resource.
+8. The result of the action will be returned. If it was saved, the resource will be transformed into an active record Model.
+9. The action result is displayed via toaster (if you defined a toaster message, like `showSuccess`)
+
+Alternative flows may happen and are supported. A similar flow applies for destroy/delete action. In any case you could call a custom method on the button click, run any custom logic and then run, `this.save()` (and the others: update, destroy etc).
+
+### The available methods in your component, once you attach the Crud Controller are: ###
+
+- `index` - list all the resources, updating the `resources` property added by `CrudData`.
+- `save`- saves or updates a resource
+- `update` - updates a resource
+- `destroy` - destroy/delete a resource
+- `get`- get a resource by its primary key
+- `confirmAndDestroy` runs the `confirmDialog` method (passed via options or defined in your component) that must return a promise. When the promise is resolved (the user confirmed the deletion) the destroy action is run.

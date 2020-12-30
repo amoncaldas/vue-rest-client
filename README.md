@@ -34,15 +34,15 @@ The solution is composed of the following files:
 
 ## Model Service ##
 
-The `ModelService` class allows defining an instance that is linked to a given resource in the API. Once defined, it can be used to run REST actions (like query and get) for the defined endpoint/resource. Internally it uses the [Model](#/src/model.js) read more. By default the returned resources are converted into Active record models so that they have methods like `$save`, `$destroy` and `$update`.
+The `ModelService` class allows defining an instance that is linked to a given resource in the API. Once defined, it can be used to run REST actions (like query and get) for the defined endpoint/resource. Internally it uses the [Model](#/src/model.js). By default the returned resources are converted into Active record models so that they have methods like `$save`, `$destroy` and `$update`.
 
-Model Service constructor Parameters:
+`ModelService` constructor parameters:
 
-1. @param string - `endPoint` the relative url of the resource
-1. @param string - `resourceName` the resource name (used to build the default confirmation messages)
-1. @param {} options - `optional` options that allows to customize the model service behavior.
+1. `endPoint` (string) - the relative url of the resource
+1. `resourceName` (string) - the resource name (used to build the default confirmation messages)
+1. `options` (Object) - options that allows to customize (optional)the model service behavior.
 
-The options object may contain the following attributes:
+The options object may contain the following properties:
 
 - `transformRequest` (function, optional): executed before the request is made. Useful to change data in special circumstances.
     This function will receive an object with the endpoint and filters (when available) attributes. It is not intended to replace the Axios.
@@ -102,9 +102,7 @@ export default myModelService
 
 After this my-model-service.js file is created, you can import it anywhere in the app, and use the following methods:
 
-- `getName` - returns the model nice name
-
-- `getEndPoint` - returns the endpoint defined for the model service
+- `get(pkValue)` - get a resource identified by its primary key value
 
 - `query(filters)` - receives an array of query filters and returns a promise, that when resolved, passes a collection of resources
 
@@ -113,9 +111,11 @@ After this my-model-service.js file is created, you can import it anywhere in th
   - `data` (object): containing key -> value attributes to be used as post data)
   - `verb` (string): verb to be used - default is 'get'
   - `transformRequest`: function to be called back on transformRequest event
-
-- `get(pkValue)` - get a resource identified by its primary key value
 - `newModelInstance (rawObject)` - convert a raw object into an active record Model.
+
+- `getName` - returns the defined model nice name
+
+- `getEndPoint` - returns the endpoint defined for the model service
 
 Example of model service usage:
 

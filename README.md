@@ -271,12 +271,12 @@ If the vue `component` passed via `vm` to which you are adding the CRUD has a `$
 
 ```html
 <!-- the `crudReady` property was added my the CrudController -->
-<v-form ref="form" v-if="crudReady" @keyup.native.enter="save"> <!-- this `save` method was added by the CrudController -->
+<form ref="form" v-if="crudReady" @keyup.native.enter="save"> <!-- this `save` method was added by the CrudController -->
   <input required v-model="resource.username"> <!-- the `resource` object was created/added by the CrudData and you can define custom properties, like `username` in this case -->
   <input required v-model="resource.email"> <!-- the `resource` object was created/added by the CrudData and you can define custom properties, like `email` in this case -->
   <!-- the `crudReady` and `save` method were added my the CrudController -->
   <button v-if="crudReady" @click="save">Save</button>
-</v-form>
+</form>
 
 <!-- if queryOnStartup was passed as true via options the resources will be listed when the app runs -->
 <!-- if skipAutoIndexAfterSave was not passed as false via options the resources will be updated automatically when a resource is saved -->

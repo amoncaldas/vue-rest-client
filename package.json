@@ -1,6 +1,6 @@
 {
   "name": "vue-rest-client",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A VueJS RESTful client component to easily integrate apps with APIs",
   "author": "Amon Caldas",
   "license": "Apache-2.0",
@@ -18,7 +18,7 @@
     ]
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "@babel/core": "^7.1.6",
     "@babel/preset-env": "^7.1.6",
     "@babel/preset-react": "^7.0.0",

@@ -36,8 +36,10 @@ var CrudForm = /*#__PURE__*/function () {
         return true;
       }
 
+      var validForm = true;
+
       if (this.formRef.validate && typeof this.formRef.validate === "function") {
-        var _validForm = this.formRef.validate();
+        validForm = this.formRef.validate();
       } // Validate the native `required` input attribute
       // that is not validated by the form.validate()
 

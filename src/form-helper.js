@@ -14,8 +14,9 @@ class CrudForm {
     if (this.options.skipFormValidation) {
       return true
     }
+    let validForm = true
     if (this.formRef.validate && typeof this.formRef.validate === "function") {
-      let validForm = this.formRef.validate()
+      validForm = this.formRef.validate()
     }
 
     // Validate the native `required` input attribute

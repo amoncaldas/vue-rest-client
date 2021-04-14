@@ -2,7 +2,7 @@ import HttpClient from './http-client.js'
 import Controller from './crud-controller.js'
 import CrudData from './crud-data.js'
 import FormHelper from './form-helper.js'
-import VrcForm from './VrcForm'
+import VrcForm from './vrc-form.js'
 import ModelService from './model-service.js'
 import Model from './model.js'
 

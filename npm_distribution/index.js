@@ -27,6 +27,12 @@ Object.defineProperty(exports, "FormHelper", {
     return _formHelper["default"];
   }
 });
+Object.defineProperty(exports, "VrcForm", {
+  enumerable: true,
+  get: function get() {
+    return _vrcForm["default"];
+  }
+});
 Object.defineProperty(exports, "ModelService", {
   enumerable: true,
   get: function get() {
@@ -48,6 +54,8 @@ var _crudData = _interopRequireDefault(require("./crud-data.js"));
 
 var _formHelper = _interopRequireDefault(require("./form-helper.js"));
 
+var _vrcForm = _interopRequireDefault(require("./vrc-form.js"));
+
 var _modelService = _interopRequireDefault(require("./model-service.js"));
 
 var _model = _interopRequireDefault(require("./model.js"));
@@ -60,6 +68,7 @@ var VueRestClient = {
   HttpClient: _httpClient["default"],
   Controller: _crudController["default"],
   CrudData: _crudData["default"],
+  VrcForm: _vrcForm["default"],
   FormHelper: _formHelper["default"],
   ModelService: _modelService["default"],
   Model: _model["default"]

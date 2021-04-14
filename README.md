@@ -32,6 +32,7 @@ The solution is composed of the following files:
 - [model-service.js](#src/model-service.js)
 - [http-client.js](#src/http-client.js)
 - [model.js](#src/model.js)
+- [VrcForm.js](#src/vrc-form.js)
 - [crud.i18n.en.js](#src/i18n/crud.i18n.en.js)
 
 ## Model Service ##
@@ -310,3 +311,33 @@ Alternative flows may happen and are supported. A similar flow applies for destr
 - `destroy` - destroy/delete a resource
 - `get`- get a resource by its primary key
 - `confirmAndDestroy` runs the `confirmDialog` method (passed via options or defined in your component) that must return a promise. When the promise is resolved (the user confirmed the deletion) the destroy action is run.
+
+## Example of template with VrcForm features ##
+
+```html
+<vrc-form 
+  sendTitle="my-custom-btn-send-title" 
+  :httpOptions="{...}"
+  recaptcha-key="recaptcha-site-key-if-you-want-to-use-it"
+  :options="{...}"
+  :res="{}"
+  mode="create"
+  content-name="my-resource-name"
+  endpoint="wpp/v1/message/send">
+  <div slot="default">
+    <v-text-field label="My input label" v-model="resource.name" autofocus required></v-text-field>
+  </div>
+</vrc-form>
+```
+
+The flow of VrcForm is similar to the direct use of a CrudController. The difference is that is might emit the following events during form events/handling:
+
+ * resourceLoaded (pass resource)
+ * reourceLoadingFailed (pass error)
+ * loaded
+ * saved (pass resource)
+ * saveError (pass error)
+ * submitting (when submit process starts)
+ * captchaVerified (if using recaptcha and it is verified)
+ * captchaExpired (if using recaptcha and it expires)
+ * newEvent (passing {eventName: String, data: {*}})

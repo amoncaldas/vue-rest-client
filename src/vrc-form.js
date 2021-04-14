@@ -1,23 +1,36 @@
 import ModelService from './model-service'
 import CrudController from './crud-controller'
-import CrudData from './crud-data'
 import VueRecaptcha from 'vue-recaptcha'
+
+/**
+ * Vue-Res-Client form (Vrc-Form)
+ * @emits resourceLoaded (pass resource)
+ * @emits reourceLoadingFailed (pass error)
+ * @emits loaded
+ * @emits saved (pass resource)
+ * @emits saveError (pass error)
+ * @emits submitting (when submit process starts)
+ * @emits captchaVerified
+ * @emits captchaExpired
+ * @emits newEvent (passing {eventName: String, data: {*}})
+ */
 
 export default {
   name: 'vrc-form',
-  template: `<v-form class="vrc-form" ref="form" @keyup.native.enter="submit">
-    <div slot="inputs">
-    </div>
-    <div class="vrc-form-save-btn-container" v-if="ready">
-      <v-btn color="secondary" left @click.native="submit">{{saveTitle}}</v-btn>
-    </div>
-    <vue-recaptcha v-if="recaptcha_key" :sitekey="recaptcha_key"
-      ref="recaptcha"
-      size="invisible"
-      @verify="onCaptchaVerified"
-      @expired="onCaptchaExpired">
-    </vue-recaptcha>
-  </v-form>`,
+  template: `
+    <v-form class="vrc-form" ref="form" @keyup.native.enter="submit">
+      <slot name="default" v-bind:resource="resource">
+      </slot>
+      <slot name="action" class="vrc-form-action-container" v-if="crudReady">
+        <v-btn color="secondary" style="float:right;margin-right:15px;margin-top:20px" left @click.native="submit">{{sendTitle}}</v-btn>
+      </slot>
+      <vue-recaptcha v-if="recaptchaKey" :sitekey="recaptchaKey"
+        ref="recaptcha"
+        size="invisible"
+        @verify="onCaptchaVerified"
+        @expired="onCaptchaExpired">
+      </vue-recaptcha>
+    </v-form>`,
   props: {
     contentId: {
       default: null
@@ -32,34 +45,52 @@ export default {
     },
     mode: {
       type: String,
-      default: 'crud' // possible values: crud, edit, create
+      default: 'create' // possible values: edit, create
     },
     httpOptions: {
       type: Object,
-      default: {}
+      default: function () {
+        return {}
+      },
     },
     options: {
       type: Object,
-      default: {}
+      default: function () {
+        return {}
+      },
     },
     recaptchaKey: {
       type: String,
       required: false
     },
-    saveTitle: {
+    sendTitle: {
       type: String,
-      default: 'Save'
+      default: 'Send'
+    },
+    res: {
+      type: Object,
+      default: function () {
+        return {}
+      },
+    },
+    list: {
+      type: Array,
+      default: function () {
+        return []
+      },
     }
   },
   created() {
-    this.load()
+    this.resource = this.res
+    this.resources = this.list
   },
   data() {
     return {
-      ...CrudData, // adds: resource, resources, crudReady and modelService
+      crudReady: false,
       verifiedCaptcha: false,
       context: null,
-      ready: true
+      resource: {},
+      resources: []
     }
   },
   methods: {
@@ -75,18 +106,22 @@ export default {
         let context = this
         // get the data related to the userId defined
         formService.get(this.contentId).then((resource) => {
-          context.resource = resource          
+          context.resources = resource          
           context.crudReady = true
-          context.$emit('resourceLoaded')
+          context.$emit('resourceLoaded', resource)
+          context.$emit('newEvent', {eventName: 'resourceLoaded', data: resource})
+          
           context.$emit('loaded')
+          context.$emit('newEvent', {eventName: 'loaded'})
         }).catch(error => {
-          context.$emit('reourceLoadingFailed')
-          console.log(error)
+          context.$emit('reourceLoadingFailed', error)
+          context.$emit('newEvent', {eventName: 'reourceLoadingFailed', data: error})
         })
       } else {
         // Set the crud as ready
         this.crudReady = true
-        context.$emit('loaded')
+        this.$emit('loaded')
+        this.$emit('newEvent', {eventName: 'loaded'})
       }
     },
     /**
@@ -103,12 +138,15 @@ export default {
     runSave () {
       this.save().then((resource) => {
         this.$emit('saved', resource)
+        this.$emit('newEvent', {eventName: 'saved', data: resource})
       }).catch(err => {
-        this.$emit('saveError', resource)
+        this.$emit('saveError', err)
+        this.$emit('newEvent', {eventName: 'saveError', data: err})
       })
     },
     submit () {
-      this.$emit('processing')
+      this.$emit('submitting')
+      this.$emit('newEvent', {eventName: 'submitting'})
       if (this.recaptchaKey) {
         this.$refs.recaptcha.execute()
       } else {
@@ -121,12 +159,14 @@ export default {
       self.$refs.recaptcha.reset()
       self.verifiedCaptcha = true
       this.$emit('captchaVerified')
+      this.$emit('newEvent', {eventName: 'captchaVerified'})
       this.runSave()
     },
     onCaptchaExpired () {
       this.$refs.recaptcha.reset()
       this.verifiedCaptcha = false
       this.$emit('captchaExpired')
+      this.$emit('newEvent', {eventName: 'captchaExpired'})
     },
     loadRecaptcha () {
       return new Promise((resolve) => {
@@ -144,10 +184,11 @@ export default {
     }
   },
   mounted () {
+    this.load()
     if (this.recaptchaKey) {
-      this.ready = false
+      this.crudReady = false
       this.loadRecaptcha().then(() => {
-        this.ready = true
+        this.crudReady = true
       })
     }
   },

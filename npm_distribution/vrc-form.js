@@ -9,21 +9,25 @@ var _modelService = _interopRequireDefault(require("./model-service"));
 
 var _crudController = _interopRequireDefault(require("./crud-controller"));
 
-var _crudData = _interopRequireDefault(require("./crud-data"));
-
 var _vueRecaptcha = _interopRequireDefault(require("vue-recaptcha"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var _default = {
+/**
+ * Vue-Res-Client form (Vrc-Form)
+ * @emits resourceLoaded (pass resource)
+ * @emits reourceLoadingFailed (pass error)
+ * @emits loaded
+ * @emits saved (pass resource)
+ * @emits saveError (pass error)
+ * @emits submitting (when submit process starts)
+ * @emits captchaVerified
+ * @emits captchaExpired
+ * @emits newEvent (passing {eventName: String, data: {*}})
+ */
+var _default2 = {
   name: 'vrc-form',
-  template: "<v-form class=\"vrc-form\" ref=\"form\" @keyup.native.enter=\"submit\">\n    <div slot=\"inputs\">\n    </div>\n    <div class=\"vrc-form-save-btn-container\" v-if=\"ready\">\n      <v-btn color=\"secondary\" left @click.native=\"submit\">{{saveTitle}}</v-btn>\n    </div>\n    <vue-recaptcha v-if=\"recaptcha_key\" :sitekey=\"recaptcha_key\"\n      ref=\"recaptcha\"\n      size=\"invisible\"\n      @verify=\"onCaptchaVerified\"\n      @expired=\"onCaptchaExpired\">\n    </vue-recaptcha>\n  </v-form>",
+  template: "\n    <v-form class=\"vrc-form\" ref=\"form\" @keyup.native.enter=\"submit\">\n      <slot name=\"default\" v-bind:resource=\"resource\">\n      </slot>\n      <slot name=\"action\" class=\"vrc-form-action-container\" v-if=\"crudReady\">\n        <v-btn color=\"secondary\" style=\"float:right;margin-right:15px;margin-top:20px\" left @click.native=\"submit\">{{sendTitle}}</v-btn>\n      </slot>\n      <vue-recaptcha v-if=\"recaptchaKey\" :sitekey=\"recaptchaKey\"\n        ref=\"recaptcha\"\n        size=\"invisible\"\n        @verify=\"onCaptchaVerified\"\n        @expired=\"onCaptchaExpired\">\n      </vue-recaptcha>\n    </v-form>",
   props: {
     contentId: {
       "default": null
@@ -38,36 +42,54 @@ var _default = {
     },
     mode: {
       type: String,
-      "default": 'crud' // possible values: crud, edit, create
+      "default": 'create' // possible values: edit, create
 
     },
     httpOptions: {
       type: Object,
-      "default": {}
+      "default": function _default() {
+        return {};
+      }
     },
     options: {
       type: Object,
-      "default": {}
+      "default": function _default() {
+        return {};
+      }
     },
     recaptchaKey: {
       type: String,
       required: false
     },
-    saveTitle: {
+    sendTitle: {
       type: String,
-      "default": 'Save'
+      "default": 'Send'
+    },
+    res: {
+      type: Object,
+      "default": function _default() {
+        return {};
+      }
+    },
+    list: {
+      type: Array,
+      "default": function _default() {
+        return [];
+      }
     }
   },
   created: function created() {
-    this.load();
+    this.resource = this.res;
+    this.resources = this.list;
   },
   data: function data() {
-    return _objectSpread(_objectSpread({}, _crudData["default"]), {}, {
-      // adds: resource, resources, crudReady and modelService
+    return {
+      crudReady: false,
       verifiedCaptcha: false,
       context: null,
-      ready: true
-    });
+      resource: {},
+      resources: []
+    };
   },
   methods: {
     /**
@@ -81,25 +103,34 @@ var _default = {
       if (this.contentId) {
         this.mode = 'edit'; // if content id is passed, the form assume the edit only mode
 
-        var _context = this; // get the data related to the userId defined
-
+        var context = this; // get the data related to the userId defined
 
         formService.get(this.contentId).then(function (resource) {
-          _context.resource = resource;
-          _context.crudReady = true;
-
-          _context.$emit('resourceLoaded');
-
-          _context.$emit('loaded');
+          context.resources = resource;
+          context.crudReady = true;
+          context.$emit('resourceLoaded', resource);
+          context.$emit('newEvent', {
+            eventName: 'resourceLoaded',
+            data: resource
+          });
+          context.$emit('loaded');
+          context.$emit('newEvent', {
+            eventName: 'loaded'
+          });
         })["catch"](function (error) {
-          _context.$emit('reourceLoadingFailed');
-
-          console.log(error);
+          context.$emit('reourceLoadingFailed', error);
+          context.$emit('newEvent', {
+            eventName: 'reourceLoadingFailed',
+            data: error
+          });
         });
       } else {
         // Set the crud as ready
         this.crudReady = true;
-        context.$emit('loaded');
+        this.$emit('loaded');
+        this.$emit('newEvent', {
+          eventName: 'loaded'
+        });
       }
     },
 
@@ -119,12 +150,25 @@ var _default = {
 
       this.save().then(function (resource) {
         _this.$emit('saved', resource);
+
+        _this.$emit('newEvent', {
+          eventName: 'saved',
+          data: resource
+        });
       })["catch"](function (err) {
-        _this.$emit('saveError', resource);
+        _this.$emit('saveError', err);
+
+        _this.$emit('newEvent', {
+          eventName: 'saveError',
+          data: err
+        });
       });
     },
     submit: function submit() {
-      this.$emit('processing');
+      this.$emit('submitting');
+      this.$emit('newEvent', {
+        eventName: 'submitting'
+      });
 
       if (this.recaptchaKey) {
         this.$refs.recaptcha.execute();
@@ -138,12 +182,18 @@ var _default = {
       self.$refs.recaptcha.reset();
       self.verifiedCaptcha = true;
       this.$emit('captchaVerified');
+      this.$emit('newEvent', {
+        eventName: 'captchaVerified'
+      });
       this.runSave();
     },
     onCaptchaExpired: function onCaptchaExpired() {
       this.$refs.recaptcha.reset();
       this.verifiedCaptcha = false;
       this.$emit('captchaExpired');
+      this.$emit('newEvent', {
+        eventName: 'captchaExpired'
+      });
     },
     loadRecaptcha: function loadRecaptcha() {
       return new Promise(function (resolve) {
@@ -162,10 +212,12 @@ var _default = {
   mounted: function mounted() {
     var _this2 = this;
 
+    this.load();
+
     if (this.recaptchaKey) {
-      this.ready = false;
+      this.crudReady = false;
       this.loadRecaptcha().then(function () {
-        _this2.ready = true;
+        _this2.crudReady = true;
       });
     }
   },
@@ -173,4 +225,4 @@ var _default = {
     VueRecaptcha: _vueRecaptcha["default"]
   }
 };
-exports["default"] = _default;
+exports["default"] = _default2;

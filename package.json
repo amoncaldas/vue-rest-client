@@ -1,6 +1,6 @@
 {
   "name": "vue-rest-client",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A VueJS RESTful client component to easily integrate apps with APIs",
   "author": "Amon Caldas",
   "license": "Apache-2.0",
@@ -45,7 +45,8 @@
     "jshint": "2.9.5",
     "prettier": "^1.14.3",
     "uglifyify": "4.0.5",
-    "watchify": "3.11.0"
+    "watchify": "3.11.0",
+    "vue-recaptcha": "^1.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
@@ -53,7 +54,8 @@
     "@babel/plugin-transform-arrow-functions": "^7.12.1",
     "babel-preset-stage-0": "^6.24.1",
     "browserify": "16.2.2",
-    "browserify-swap": "0.2.2"
+    "browserify-swap": "0.2.2",
+    "webpack-node-externals": "^1.7.2"
   },
   "repository": {
     "type": "git",

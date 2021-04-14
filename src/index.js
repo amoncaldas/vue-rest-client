@@ -2,6 +2,7 @@ import HttpClient from './http-client.js'
 import Controller from './crud-controller.js'
 import CrudData from './crud-data.js'
 import FormHelper from './form-helper.js'
+import VrcForm from './VrcForm'
 import ModelService from './model-service.js'
 import Model from './model.js'
 
@@ -9,6 +10,7 @@ const VueRestClient = {
   HttpClient: HttpClient,
   Controller: Controller,
   CrudData: CrudData,
+  VrcForm: VrcForm,
   FormHelper: FormHelper,
   ModelService: ModelService,
   Model: Model
@@ -32,6 +34,7 @@ export {HttpClient}
 export {Controller}
 export {CrudData}
 export {FormHelper}
+export {VrcForm}
 export {ModelService}
 export {Model}
 

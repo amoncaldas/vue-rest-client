@@ -39,7 +39,7 @@ class Controller {
    * The initial function is executed when the class is built
    * if the option queryOnStartup is true, it will also load the resources automatically.
    */
-  run () {
+  run = () => {
     this.vm.resource = this.modelService.newModelInstance()
 
     // Add the CRUD methods to the vue compnent (vm) passed via  constructor
@@ -71,7 +71,7 @@ class Controller {
    * @param {String} key
    * @return {String} msg
    */
-  translateText (key) {
+  translateText = (key) => {
     let transaltion
     if (this.options[key]) {
       transaltion = this.options[key]
@@ -551,7 +551,7 @@ class Controller {
    */
   formIsValid (reject) {
     let validForm = true // init as valid
-    let formRef = this.options.formRef || 'form' // get the form ref (custom or default one)
+    let formRef = this.options.formRef || 'vrcForm' // get the form ref (custom or default one)
     let form = this.vm.$refs[formRef] || null // get the form object using the formRef
 
     let formHelper = new FormHelper(form, this.vm, this.options)

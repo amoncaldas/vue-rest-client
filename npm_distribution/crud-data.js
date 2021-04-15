@@ -10,8 +10,8 @@ exports["default"] = void 0;
  * data attribute in the vue data section
  */
 var CRUDData = {
-  resource: null,
   resources: [],
+  resource: {},
   crudReady: false,
   modelService: null
 }; // Export the CRUD and the CRUDData objects

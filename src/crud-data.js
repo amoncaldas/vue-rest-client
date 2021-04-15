@@ -3,8 +3,8 @@
  * data attribute in the vue data section
  */
 const CRUDData = {
-  resource: null,
   resources: [],
+  resource: {},
   crudReady: false,
   modelService: null
 }

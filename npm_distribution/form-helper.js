@@ -9,6 +9,8 @@ var _crudI18n = _interopRequireDefault(require("./i18n/crud.i18n.en"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -103,8 +105,20 @@ var CrudForm = /*#__PURE__*/function () {
       var _this = this;
 
       var validForm = true;
-      this.getInputs(this.formRef).forEach(function (input) {
-        // We only validate the  required attribute if the input is not yet invalid
+      var inputs = this.getInputs(this.formRef);
+      inputs.forEach(function (input) {
+        input.required = input.$el.hasAttribute('required') || input.$attrs.required !== undefined; // We only validate the required attribute if the input is not yet invalid
+
+        var validateType = _typeof(input.validate);
+
+        if (validateType === 'function') {
+          input.valid = input.validate();
+        }
+
+        if (input.inputValue === undefined && input.value !== undefined) {
+          input.inputValue = input.value;
+        }
+
         if (input.valid && input.required && (input.inputValue === undefined || input.inputValue === null || input.inputValue === '')) {
           input.valid = validForm = false;
 
@@ -113,6 +127,19 @@ var CrudForm = /*#__PURE__*/function () {
           if (input.errorBucket && Array.isArray(input.errorBucket)) {
             input.errorBucket.push(errorMsg);
           }
+        }
+
+        var firstInvalid;
+
+        for (var key in inputs) {
+          if (!inputs[key].valid) {
+            firstInvalid = inputs[key];
+            break;
+          }
+        }
+
+        if (firstInvalid && typeof firstInvalid.focus === 'function') {
+          firstInvalid.focus();
         }
       });
       return validForm;
@@ -136,7 +163,7 @@ var CrudForm = /*#__PURE__*/function () {
         for (var index = 0; index < children.length; index++) {
           var child = children[index];
 
-          if (child.errorBucket !== undefined) {
+          if (child.$el.localName === 'input' || child.$_modelEvent === 'input') {
             results.push(child);
           } else {
             search(child.$children, depth + 1);

@@ -68,14 +68,36 @@ class CrudForm {
    */
   validateRequiredFields () {
     let validForm = true
-    this.getInputs(this.formRef).forEach(input => {
-      // We only validate the  required attribute if the input is not yet invalid
+    let inputs = this.getInputs(this.formRef)
+    inputs.forEach(input => {
+      input.required = input.$el.hasAttribute('required') || input.$attrs.required !== undefined
+      // We only validate the required attribute if the input is not yet invalid
+      let validateType = typeof input.validate
+      if (validateType === 'function') {
+        input.valid = input.validate()
+      }
+
+      if (input.inputValue === undefined && input.value !== undefined) {
+        input.inputValue = input.value
+      }
+      
       if (input.valid && input.required && (input.inputValue === undefined || input.inputValue === null || input.inputValue === '')) {
         input.valid = validForm = false
         let errorMsg = `${input.label} ${this.tanslateText('requiredMsg')}` || this.tanslateText('inputRequiredMsg')
         if (input.errorBucket && Array.isArray(input.errorBucket)) {
           input.errorBucket.push(errorMsg)
         }
+      }
+
+      let firstInvalid
+      for (let key in inputs) {
+        if (!inputs[key].valid) {
+          firstInvalid = inputs[key]
+          break
+        }
+      }
+      if (firstInvalid && typeof firstInvalid.focus === 'function') {
+        firstInvalid.focus()
       }
     })
     return validForm
@@ -95,7 +117,7 @@ class CrudForm {
 
       for (var index = 0; index < children.length; index++) {
         var child = children[index]
-        if (child.errorBucket !== undefined) {
+        if (child.$el.localName === 'input' || child.$_modelEvent === 'input') {
           results.push(child)
         } else {
           search(child.$children, depth + 1)

@@ -38,89 +38,6 @@ var Controller = /*#__PURE__*/function () {
 
 
   _createClass(Controller, [{
-    key: "run",
-
-    /**
-     * The initial function is executed when the class is built
-     * if the option queryOnStartup is true, it will also load the resources automatically.
-     */
-    value: function run() {
-      var _this = this;
-
-      this.vm.resource = this.modelService.newModelInstance(); // Add the CRUD methods to the vue compnent (vm) passed via  constructor
-
-      this.vm.index = this.index;
-      this.vm.get = this.get;
-      this.vm.save = this.save;
-      this.vm.update = this.update;
-      this.vm.destroy = this.destroy;
-      this.vm.confirmAndDestroy = this.confirmAndDestroy; // Add the toaster methods to the vue compnent (vm) passed via  constructor (if not available, use fallback methods)
-
-      this.vm.showSuccess = this.options.showSuccess || this.vm.showSuccess || this.fallBackShowSuccess;
-      this.vm.showInfo = this.options.showInfo || this.vm.showInfo || this.fallBackShowInfo;
-      this.vm.showError = this.options.showError || this.vm.showError || this.fallBackShowError;
-      this.vm.confirmDialog = this.options.confirmDialog || this.vm.confirmDialog || this.fallBackConfirmDialog; // If quey on start up is enabled,
-      // run the initial query
-
-      if (this.options.queryOnStartup) {
-        this.vm.index().then(function (resources) {
-          _this.vm.resources = resources;
-          _this.vm.crudReady = true;
-        });
-      }
-    }
-    /**
-     * TRansalte text to be displayed
-     * @param {String} key
-     * @return {String} msg
-     */
-
-  }, {
-    key: "translateText",
-    value: function translateText(key) {
-      var transaltion;
-
-      if (this.options[key]) {
-        transaltion = this.options[key];
-      } // If a custom translate function was passed via options, use it
-
-
-      if (!transaltion && this.options.translateFn && typeof this.options.translateFn == "function") {
-        transaltion = this.options.translateFn(key);
-      } // If vue-i18n is present in the app
-      // then the $t function must be defined.
-      // We check and try to use it.
-
-
-      if (!transaltion && this.vm.$t) {
-        var translationPath = "crud.".concat(key);
-        var trans = this.vm.$t(translationPath); // Even if $t, the key must not be
-        // present in the expected translation
-        // path. So we make sure that the result 
-        // is not the same of the path
-
-        if (trans !== translationPath) {
-          transaltion = trans;
-        }
-      } // If none of the tries above work
-      // then an error is logged in the console and the 
-      // fallback english ext for the given key is used.
-
-
-      if (!transaltion) {
-        console.error("The translation for the string ".concat(key, " was not passed via options, nor is present in 'crud.").concat(key, "' to be used via $t 'vue-i18n', so a fallback English string was used."));
-        transaltion = _crudI18n["default"].crud[key] || key;
-      }
-
-      return transaltion;
-    }
-    /**
-     * Alternative function to show CRUD success
-     * @param {String} msg
-     * @param {*} options
-     */
-
-  }, {
     key: "handleError",
 
     /**
@@ -234,7 +151,7 @@ var Controller = /*#__PURE__*/function () {
     value: function formIsValid(reject) {
       var validForm = true; // init as valid
 
-      var formRef = this.options.formRef || 'form'; // get the form ref (custom or default one)
+      var formRef = this.options.formRef || 'vrcForm'; // get the form ref (custom or default one)
 
       var form = this.vm.$refs[formRef] || null; // get the form object using the formRef
 
@@ -319,6 +236,11 @@ var Controller = /*#__PURE__*/function () {
     value: function set(vm, modelService, options) {
       return new Controller(vm, modelService, options);
     }
+    /**
+     * The initial function is executed when the class is built
+     * if the option queryOnStartup is true, it will also load the resources automatically.
+     */
+
   }]);
 
   return Controller;
@@ -326,7 +248,71 @@ var Controller = /*#__PURE__*/function () {
 
 
 var _initialiseProps = function _initialiseProps() {
-  var _this2 = this;
+  var _this = this;
+
+  this.run = function () {
+    _this.vm.resource = _this.modelService.newModelInstance(); // Add the CRUD methods to the vue compnent (vm) passed via  constructor
+
+    _this.vm.index = _this.index;
+    _this.vm.get = _this.get;
+    _this.vm.save = _this.save;
+    _this.vm.update = _this.update;
+    _this.vm.destroy = _this.destroy;
+    _this.vm.confirmAndDestroy = _this.confirmAndDestroy; // Add the toaster methods to the vue compnent (vm) passed via  constructor (if not available, use fallback methods)
+
+    _this.vm.showSuccess = _this.options.showSuccess || _this.vm.showSuccess || _this.fallBackShowSuccess;
+    _this.vm.showInfo = _this.options.showInfo || _this.vm.showInfo || _this.fallBackShowInfo;
+    _this.vm.showError = _this.options.showError || _this.vm.showError || _this.fallBackShowError;
+    _this.vm.confirmDialog = _this.options.confirmDialog || _this.vm.confirmDialog || _this.fallBackConfirmDialog; // If quey on start up is enabled,
+    // run the initial query
+
+    if (_this.options.queryOnStartup) {
+      _this.vm.index().then(function (resources) {
+        _this.vm.resources = resources;
+        _this.vm.crudReady = true;
+      });
+    }
+  };
+
+  this.translateText = function (key) {
+    var transaltion;
+
+    if (_this.options[key]) {
+      transaltion = _this.options[key];
+    } // If a custom translate function was passed via options, use it
+
+
+    if (!transaltion && _this.options.translateFn && typeof _this.options.translateFn == "function") {
+      transaltion = _this.options.translateFn(key);
+    } // If vue-i18n is present in the app
+    // then the $t function must be defined.
+    // We check and try to use it.
+
+
+    if (!transaltion && _this.vm.$t) {
+      var translationPath = "crud.".concat(key);
+
+      var trans = _this.vm.$t(translationPath); // Even if $t, the key must not be
+      // present in the expected translation
+      // path. So we make sure that the result 
+      // is not the same of the path
+
+
+      if (trans !== translationPath) {
+        transaltion = trans;
+      }
+    } // If none of the tries above work
+    // then an error is logged in the console and the 
+    // fallback english ext for the given key is used.
+
+
+    if (!transaltion) {
+      console.error("The translation for the string ".concat(key, " was not passed via options, nor is present in 'crud.").concat(key, "' to be used via $t 'vue-i18n', so a fallback English string was used."));
+      transaltion = _crudI18n["default"].crud[key] || key;
+    }
+
+    return transaltion;
+  };
 
   this.fallBackShowSuccess = function (msg, options) {
     console.log(msg, options);
@@ -344,7 +330,7 @@ var _initialiseProps = function _initialiseProps() {
     var error = 'Confirm dialog function was not properly passed via parameters. Check the console to see more info.';
     console.error(error, msg, options);
 
-    if (_this2.options.skipDestroyConfirmation) {
+    if (_this.options.skipDestroyConfirmation) {
       // As the confirm dialog function was not defined, the action has been cancelled
       return new Promise(function (resolve, reject) {
         resolve(true);
@@ -358,7 +344,7 @@ var _initialiseProps = function _initialiseProps() {
   };
 
   this.index = function (filters) {
-    var context = _this2;
+    var context = _this;
     return new Promise(function (resolve, reject) {
       var proceed = context.runProceedCallBack('beforeIndex', reject);
 
@@ -375,7 +361,7 @@ var _initialiseProps = function _initialiseProps() {
 
           context.vm.resources = resources; // runs the optional after callback (if the function is defined in the Vue component) an pass the data
 
-          context.runAfterCallBack('afterIndex', _this2.vm.resources); // In the default CRUD usage, it is not necessary to
+          context.runAfterCallBack('afterIndex', _this.vm.resources); // In the default CRUD usage, it is not necessary to
           // listen to the promise result
           // if the promise is not being listened
           // it can raise an error when rejected/resolved.
@@ -396,7 +382,7 @@ var _initialiseProps = function _initialiseProps() {
   };
 
   this.get = function (pkValue) {
-    var context = _this2;
+    var context = _this;
     return new Promise(function (resolve, reject) {
       var proceed = context.runProceedCallBack('beforeGet', reject);
 
@@ -427,7 +413,7 @@ var _initialiseProps = function _initialiseProps() {
   };
 
   this.save = function () {
-    var context = _this2; // We return a promise and resolve/reject it because optionally, the developer
+    var context = _this; // We return a promise and resolve/reject it because optionally, the developer
     // can have its own save method, and after it is finished do something special
 
     return new Promise(function (resolve, reject) {
@@ -482,7 +468,7 @@ var _initialiseProps = function _initialiseProps() {
   };
 
   this.update = function () {
-    var context = _this2;
+    var context = _this;
     return new Promise(function (resolve, reject) {
       var validForm = context.formIsValid(reject);
       var proceed = context.runProceedCallBack('beforeUpdate', reject);
@@ -525,7 +511,7 @@ var _initialiseProps = function _initialiseProps() {
   };
 
   this.confirmAndDestroy = function (resource) {
-    var context = _this2;
+    var context = _this;
     return new Promise(function (resolve, reject) {
       // Define the conformation modal title to be displayed before destroying
       var confirmTitle = context.translateText('removalConfirmTitle'); // Define the conformation modal text to be displayed before destroying
@@ -557,7 +543,7 @@ var _initialiseProps = function _initialiseProps() {
   };
 
   this.destroy = function (resource) {
-    var context = _this2;
+    var context = _this;
     return new Promise(function (resolve, reject) {
       var proceed = context.runProceedCallBack('beforeDestroy', reject);
 

@@ -27,12 +27,12 @@ This will be saved to `vue-rest-client/dist/vue-rest-client.js`.
 
 The solution is composed of the following files:
 
-- [crud-controller.js](#src/crud-controller.js)
-- [form-helper.js](#src/form-helper.js)
-- [model-service.js](#src/model-service.js)
+- [crud-controller.js](#/src/crud-controller.js)
+- [form-helper.js](#/src/form-helper.js)
+- [model-service.js](#/src/model-service.js)
 - [http-client.js](#src/http-client.js)
-- [model.js](#src/model.js)
-- [VrcForm.js](#src/vrc-form.js)
+- [model.js](#/src/model.js)
+- [VrcForm.js](#/src/vrc-form.js)
 - [crud.i18n.en.js](#src/i18n/crud.i18n.en.js)
 
 ## Model Service ##
@@ -164,9 +164,9 @@ to a component that uses the RESTFul API pattern. It is intended to be used in c
 This crud class implements the full cycle to get and send data to/from a remote server, including before destroy confirmation dialog,
 refresh listed data after save, destroy and update and success and confirmation messages.
 
-To use this feature you will need to import `CrudController` and `CrudData` and use them as follows:
+To use this feature you will need to import `Controller` and `CrudData` and use them as follows:
 
-The `CrudController` **set** method expects the following parameters:
+The `Controller` **set** method expects the following parameters:
 
 1. @param {} `vm` - the component instance, that can be passed using `this`
 1. @param {} `modelService`  - an instance of the ModelService class representing the service that provides the data service to a resource. @see src/model-service
@@ -317,9 +317,8 @@ Alternative flows may happen and are supported. A similar flow applies for destr
 ```html
 <vrc-form 
   sendTitle="my-custom-btn-send-title" 
-  :httpOptions="{...}"
-  recaptcha-key="recaptcha-site-key-if-you-want-to-use-it"
   :options="{...}"
+  recaptcha-key="recaptcha-site-key-if-you-want-to-use-it"
   :res="{}"
   mode="create"
   content-name="my-resource-name"
@@ -329,6 +328,21 @@ Alternative flows may happen and are supported. A similar flow applies for destr
   </div>
 </vrc-form>
 ```
+
+The options parameter expect an object with the same properties that the `Controller.set` method expects, plus:
+
+1. `http` -> an object with the possible parameters expected by yhe `HttpClient`, plus the `raw` flag (boolean)
+
+The options object may contain the following properties:
+
+- `transformRequest` (function, optional): executed before the request is made. Useful to change data in special circumstances.
+    This function will receive an object with the endpoint and filters (when available) attributes. It is not intended to replace the Axios.
+    request interceptor!
+- `transformResponse` (function, optional): executed after the request is made, passing the original response object received.
+    Useful if it necessary to modify the data returned before transforming them in a Model instance
+- `raw` (boolean, optional): defines if the default transformation of the results into Model instances must be skipped.
+    If it is true, the active record will not work with the returned items. Useful when you just want to get data, and not destroy/update them
+- `pk` (string, optional): overwrites the default primary key attribute, that is 'id'. Use it if your model on the remote server uses a different field as primary key.
 
 The flow of VrcForm is similar to the direct use of a CrudController. The difference is that is might emit the following events during form events/handling:
 

@@ -15,7 +15,7 @@ class CrudForm {
       return true
     }
     let validForm = true
-    if (this.formRef.validate && typeof this.formRef.validate === "function") {
+    if (this.formRef && typeof this.formRef.validate === "function") {
       validForm = this.formRef.validate()
     }
 

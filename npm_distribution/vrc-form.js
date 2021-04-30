@@ -9,15 +9,13 @@ var _modelService = _interopRequireDefault(require("./model-service"));
 
 var _crudController = _interopRequireDefault(require("./crud-controller"));
 
-var _crudData = _interopRequireDefault(require("./crud-data"));
-
 var _vueRecaptcha = _interopRequireDefault(require("vue-recaptcha"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 var _default2 = {
   name: 'vrc-form',
-  template: "\n    <v-form class=\"vrc-form\" ref=\"form\" @keyup.native.enter=\"submit\">\n      <slot name=\"default\">\n      </slot>\n      <slot name=\"action\" class=\"vrc-form-action-container\" v-if=\"vm.crudReady\">\n        <v-btn color=\"secondary\" style=\"float:right;margin-right:15px;margin-top:20px\" left @click.native=\"submit\">{{sendTitle}}</v-btn>\n      </slot>\n      <vue-recaptcha v-if=\"recaptchaKey\" :sitekey=\"recaptchaKey\"\n        ref=\"recaptcha\"\n        size=\"invisible\"\n        @verify=\"onCaptchaVerified\"\n        @expired=\"onCaptchaExpired\">\n      </vue-recaptcha>\n    </v-form>",
+  template: "\n    <v-form class=\"vrc-form\" ref=\"vrcForm\" @keyup.native.enter=\"submit\">\n      <slot name=\"default\">\n      </slot>\n      <slot name=\"action\" class=\"vrc-form-action-container\" v-if=\"vm.crudReady\">\n        <v-btn color=\"secondary\" style=\"float:right;margin-right:15px;margin-top:20px\" left @click.native=\"submit\">{{sendTitle}}</v-btn>\n      </slot>\n      <vue-recaptcha v-if=\"recaptchaKey\" :sitekey=\"recaptchaKey\"\n        ref=\"recaptcha\"\n        size=\"invisible\"\n        @verify=\"onCaptchaVerified\"\n        @expired=\"onCaptchaExpired\">\n      </vue-recaptcha>\n    </v-form>",
   props: {
     contentId: {
       "default": null
@@ -35,13 +33,7 @@ var _default2 = {
       "default": 'create' // possible values: 'edit', 'create'
 
     },
-    httpOptions: {
-      type: Object,
-      "default": function _default() {
-        return {};
-      }
-    },
-    crudOptions: {
+    options: {
       type: Object,
       "default": function _default() {
         return {};
@@ -65,8 +57,18 @@ var _default2 = {
   data: function data() {
     return {
       verifiedCaptcha: false,
-      context: null
+      context: null,
+      crudOptions: null,
+      httpOptions: null
     };
+  },
+  created: function created() {
+    if (this.options.http) {
+      this.httpOptions = this.options.http;
+      delete this.options.http;
+    }
+
+    this.crudOptions = this.options;
   },
   methods: {
     /**
@@ -102,10 +104,36 @@ var _default2 = {
      * Builds and return the form service object
      */
     buildFormService: function buildFormService() {
+      var raw = false;
+
+      if (this.httpOptions.raw === true) {
+        raw = true;
+        delete this.httpOptions.raw;
+      }
+
+      var pkName = false;
+
+      if (this.httpOptions.pk) {
+        pkName = this.httpOptions.pk;
+        delete this.httpOptions.pk;
+      }
+
       var serviceOptions = {
-        raw: true,
+        pk: pkName,
+        raw: raw,
         httpClientOptions: this.httpOptions
       };
+
+      if (httpOptions.transformRequest) {
+        serviceOptions.transformRequest = httpOptions.transformRequest;
+        delete httpOptions.transformRequest;
+      }
+
+      if (httpOptions.transformResponse) {
+        serviceOptions.transformResponse = httpOptions.transformResponse;
+        delete httpOptions.transformResponse;
+      }
+
       var formService = new _modelService["default"](this.endpoint, this.name, serviceOptions);
       return formService;
     },

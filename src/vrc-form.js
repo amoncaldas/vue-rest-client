@@ -1,12 +1,11 @@
 import ModelService from './model-service'
 import CrudController from './crud-controller'
-import CrudData from './crud-data'
 import VueRecaptcha from 'vue-recaptcha'
 
 export default {
   name: 'vrc-form',
   template: `
-    <v-form class="vrc-form" ref="form" @keyup.native.enter="submit">
+    <v-form class="vrc-form" ref="vrcForm" @keyup.native.enter="submit">
       <slot name="default">
       </slot>
       <slot name="action" class="vrc-form-action-container" v-if="vm.crudReady">
@@ -35,13 +34,7 @@ export default {
       type: String,
       default: 'create' // possible values: 'edit', 'create'
     },
-    httpOptions: {
-      type: Object,
-      default: function () {
-        return {}
-      },
-    },
-    crudOptions: {
+    options: {
       type: Object,
       default: function () {
         return {}
@@ -65,8 +58,17 @@ export default {
   data () {
     return {
       verifiedCaptcha: false,
-      context: null
+      context: null,
+      crudOptions: null,
+      httpOptions: null
     }
+  },
+  created () {
+    if (this.options.http) {
+      this.httpOptions = this.options.http
+      delete this.options.http
+    } 
+    this.crudOptions = this.options
   },
   methods: {
     /**
@@ -99,9 +101,24 @@ export default {
      * Builds and return the form service object
      */
     buildFormService () {
-      let serviceOptions = {
-        raw: true,
-        httpClientOptions: this.httpOptions
+      let raw = false
+      if (this.httpOptions.raw === true) {
+        raw = true
+        delete this.httpOptions.raw
+      }
+      let pkName = false
+      if (this.httpOptions.pk) {
+        pkName = this.httpOptions.pk
+        delete this.httpOptions.pk
+      }
+      let serviceOptions = {pk: pkName, raw: raw, httpClientOptions: this.httpOptions}
+      if (httpOptions.transformRequest) {
+        serviceOptions.transformRequest = httpOptions.transformRequest
+        delete httpOptions.transformRequest
+      }
+      if (httpOptions.transformResponse) {
+        serviceOptions.transformResponse = httpOptions.transformResponse
+        delete httpOptions.transformResponse
       }
       const formService = new ModelService(this.endpoint, this.name, serviceOptions)
       return formService

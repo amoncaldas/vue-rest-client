@@ -67,7 +67,9 @@ export default {
     if (this.options.http) {
       this.httpOptions = this.options.http
       delete this.options.http
-    } 
+    } else {
+      this.httpOptions = {}
+    }
     this.crudOptions = this.options
   },
   methods: {

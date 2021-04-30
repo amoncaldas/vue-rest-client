@@ -66,6 +66,8 @@ var _default2 = {
     if (this.options.http) {
       this.httpOptions = this.options.http;
       delete this.options.http;
+    } else {
+      this.httpOptions = {};
     }
 
     this.crudOptions = this.options;

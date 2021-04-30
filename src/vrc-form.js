@@ -108,19 +108,19 @@ export default {
         raw = true
         delete this.httpOptions.raw
       }
-      let pkName = false
+      let pkName = 'id'
       if (this.httpOptions.pk) {
         pkName = this.httpOptions.pk
         delete this.httpOptions.pk
       }
       let serviceOptions = {pk: pkName, raw: raw, httpClientOptions: this.httpOptions}
-      if (httpOptions.transformRequest) {
-        serviceOptions.transformRequest = httpOptions.transformRequest
-        delete httpOptions.transformRequest
+      if (this.httpOptions.transformRequest) {
+        serviceOptions.transformRequest = this.httpOptions.transformRequest
+        delete this.httpOptions.transformRequest
       }
-      if (httpOptions.transformResponse) {
-        serviceOptions.transformResponse = httpOptions.transformResponse
-        delete httpOptions.transformResponse
+      if (this.httpOptions.transformResponse) {
+        serviceOptions.transformResponse = this.httpOptions.transformResponse
+        delete this.httpOptions.transformResponse
       }
       const formService = new ModelService(this.endpoint, this.name, serviceOptions)
       return formService

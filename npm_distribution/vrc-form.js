@@ -113,7 +113,7 @@ var _default2 = {
         delete this.httpOptions.raw;
       }
 
-      var pkName = false;
+      var pkName = 'id';
 
       if (this.httpOptions.pk) {
         pkName = this.httpOptions.pk;
@@ -126,14 +126,14 @@ var _default2 = {
         httpClientOptions: this.httpOptions
       };
 
-      if (httpOptions.transformRequest) {
-        serviceOptions.transformRequest = httpOptions.transformRequest;
-        delete httpOptions.transformRequest;
+      if (this.httpOptions.transformRequest) {
+        serviceOptions.transformRequest = this.httpOptions.transformRequest;
+        delete this.httpOptions.transformRequest;
       }
 
-      if (httpOptions.transformResponse) {
-        serviceOptions.transformResponse = httpOptions.transformResponse;
-        delete httpOptions.transformResponse;
+      if (this.httpOptions.transformResponse) {
+        serviceOptions.transformResponse = this.httpOptions.transformResponse;
+        delete this.httpOptions.transformResponse;
       }
 
       var formService = new _modelService["default"](this.endpoint, this.name, serviceOptions);
